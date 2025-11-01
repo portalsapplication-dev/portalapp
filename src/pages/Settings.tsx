@@ -8,20 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, LogOut, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
 
 const Settings = () => {
-  const [darkMode, setDarkMode] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
 
   useEffect(() => {
-    const isDark = localStorage.getItem("theme") === "dark";
-    setDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    }
-
     // Check authentication status
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserEmail(session?.user?.email || null);
@@ -35,14 +31,7 @@ const Settings = () => {
   }, []);
 
   const toggleDarkMode = (checked: boolean) => {
-    setDarkMode(checked);
-    if (checked) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    setTheme(checked ? "dark" : "light");
   };
 
   const handleLogout = async () => {
@@ -110,14 +99,14 @@ const Settings = () => {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base flex items-center gap-2">
-                  {darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                  {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
                   Dark Mode
                 </Label>
                 <p className="text-sm text-muted-foreground">
                   Switch between light and dark themes
                 </p>
               </div>
-              <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
+              <Switch checked={isDark} onCheckedChange={toggleDarkMode} />
             </div>
 
             <div className="pt-6 border-t border-border">

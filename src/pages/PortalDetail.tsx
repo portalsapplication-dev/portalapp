@@ -31,6 +31,7 @@ const PortalDetail = () => {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
   const [thenNowImage, setThenNowImage] = useState<string | null>(null);
+  const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
   useEffect(() => {
     const loadPortal = async () => {
@@ -47,6 +48,17 @@ const PortalDetail = () => {
         setPortal(found);
         const unlocked = new Date() >= new Date(found.unlockDate);
         setIsUnlocked(unlocked);
+        
+        // Check if this portal has been opened before
+        const openedStatus = localStorage.getItem(`portal-opened-${id}`);
+        setHasBeenOpened(openedStatus === "true");
+        
+        // Mark as opened if unlocked and viewing
+        if (unlocked && !openedStatus) {
+          localStorage.setItem(`portal-opened-${id}`, "true");
+          setHasBeenOpened(true);
+        }
+        
         if (unlocked && !sessionStorage.getItem(`unlocked-${id}`)) {
           setShowUnlockAnimation(true);
           sessionStorage.setItem(`unlocked-${id}`, "true");
@@ -186,10 +198,17 @@ const PortalDetail = () => {
           </Card>
         ) : (
           <div className="space-y-6 animate-fade-in">
-            <Card className="p-6">
+            <Card className={`p-6 ${hasBeenOpened ? 'border-2 border-foreground/30 shadow-[0_0_30px_hsl(var(--foreground)/0.15)]' : ''}`}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{portal.title}</h1>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-3xl font-bold text-foreground">{portal.title}</h1>
+                    {hasBeenOpened && (
+                      <span className="px-3 py-1 rounded-full bg-foreground/10 text-foreground text-xs font-medium">
+                        Opened
+                      </span>
+                    )}
+                  </div>
                   <p className="text-muted-foreground">{portal.description}</p>
                 </div>
                 <AlertDialog>
@@ -268,7 +287,7 @@ const PortalDetail = () => {
                         <span className="text-sm text-muted-foreground">Upload current image</span>
                         <Input
                           type="file"
-                          accept="image/*"
+                          accept="image/png,image/jpeg,image/jpg,image/heic,image/webp"
                           onChange={handleThenNowUpload}
                           className="hidden"
                         />

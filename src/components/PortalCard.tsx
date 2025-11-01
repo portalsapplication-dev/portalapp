@@ -11,6 +11,7 @@ const PortalCard = ({ portal }: PortalCardProps) => {
   const [timeLeft, setTimeLeft] = useState<string>("");
   const unlockDate = new Date(portal.unlockDate);
   const isUnlocked = new Date() >= unlockDate;
+  const hasBeenOpened = localStorage.getItem(`portal-opened-${portal.id}`) === "true";
 
   useEffect(() => {
     if (isUnlocked) {
@@ -55,7 +56,9 @@ const PortalCard = ({ portal }: PortalCardProps) => {
         <div 
           className={`absolute inset-0 rounded-full transition-all duration-700 ${
             isUnlocked 
-              ? "bg-gradient-to-br from-foreground/15 via-foreground/8 to-transparent animate-portal-pulse blur-3xl" 
+              ? hasBeenOpened
+                ? "bg-gradient-to-br from-foreground/20 via-foreground/10 to-transparent blur-3xl" 
+                : "bg-gradient-to-br from-foreground/15 via-foreground/8 to-transparent animate-portal-pulse blur-3xl"
               : isNearUnlock
               ? "bg-gradient-to-br from-foreground/12 via-foreground/6 to-transparent animate-glow-pulse blur-3xl"
               : "bg-gradient-to-br from-foreground/8 via-foreground/4 to-transparent blur-3xl"
@@ -66,12 +69,14 @@ const PortalCard = ({ portal }: PortalCardProps) => {
         <div 
           className={`absolute inset-0 rounded-full border transition-all duration-500 ${
             isUnlocked 
-              ? "border-foreground/70 shadow-[0_0_30px_hsl(var(--foreground)/0.4)]" 
+              ? hasBeenOpened
+                ? "border-foreground/50 shadow-[0_0_20px_hsl(var(--foreground)/0.25)]"
+                : "border-foreground/70 shadow-[0_0_30px_hsl(var(--foreground)/0.4)]"
               : isNearUnlock
               ? "border-foreground/50 shadow-[0_0_20px_hsl(var(--foreground)/0.3)] animate-glow-pulse"
               : "border-foreground/30 shadow-[0_0_15px_hsl(var(--foreground)/0.15)]"
           } group-hover:border-foreground/80 group-hover:shadow-[0_0_40px_hsl(var(--foreground)/0.5)]`}
-          style={{ borderWidth: '2px' }}
+          style={{ borderWidth: hasBeenOpened ? '3px' : '2px' }}
         />
         
         {/* Inner spinning ring */}

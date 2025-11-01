@@ -8,6 +8,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Home = () => {
   const [portals, setPortals] = useState<Portal[]>([]);
@@ -57,9 +58,31 @@ const Home = () => {
   useEffect(() => {
     if (!isAuthenticated) return;
     
-    const interval = setInterval(loadPortals, 60000);
+    const interval = setInterval(async () => {
+      const oldPortals = portals;
+      await loadPortals();
+      
+      // Check for newly unlocked portals
+      const newPortals = await getPortals();
+      newPortals.forEach(newPortal => {
+        const oldPortal = oldPortals.find(p => p.id === newPortal.id);
+        const wasLocked = oldPortal && new Date(oldPortal.unlockDate) > new Date();
+        const isNowUnlocked = new Date(newPortal.unlockDate) <= new Date();
+        
+        if (wasLocked && isNowUnlocked && !sessionStorage.getItem(`notified-${newPortal.id}`)) {
+          toast.success(`🎉 ${newPortal.title} is ready!`, {
+            description: "Your portal has unlocked. Tap to view.",
+            action: {
+              label: "View",
+              onClick: () => navigate(`/portal/${newPortal.id}`)
+            }
+          });
+          sessionStorage.setItem(`notified-${newPortal.id}`, "true");
+        }
+      });
+    }, 60000);
     return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, portals, navigate]);
 
   if (isLoading) {
     return <LoadingScreen text="Loading your portals..." />;
@@ -100,15 +123,6 @@ const Home = () => {
       ) : portals.length === 0 ? (
         <div className="text-center py-20 space-y-4 animate-fade-in">
           <p className="text-muted-foreground text-lg">No portals yet</p>
-          <Link to="/create">
-            <Button 
-              className="bg-foreground text-background hover:bg-foreground/90 shadow-lg hover:shadow-xl transition-all h-14 px-8 text-lg"
-              size="lg"
-            >
-              <Plus className="w-6 h-6 mr-2" />
-              Create Your First Portal
-            </Button>
-          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 pb-4 animate-fade-in">

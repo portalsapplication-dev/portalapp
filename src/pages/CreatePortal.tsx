@@ -34,6 +34,7 @@ const CreatePortal = () => {
   const [images, setImages] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [finalNotes, setFinalNotes] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -102,7 +103,10 @@ const CreatePortal = () => {
   };
 
   const handleFinish = async () => {
+    if (isCreating) return; // Prevent duplicate creation
+    
     try {
+      setIsCreating(true);
       console.log("Starting portal creation...");
       const portal: Omit<Portal, "id"> = {
         title: title.trim(),
@@ -127,6 +131,8 @@ const CreatePortal = () => {
     } catch (error) {
       console.error("Error in handleFinish:", error);
       toast.error("An error occurred while creating the portal.");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -198,7 +204,7 @@ const CreatePortal = () => {
             
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-3">
-                {DURATION_PRESETS.map((preset) => (
+                {DURATION_PRESETS.filter(p => !p.custom).map((preset) => (
                   <Button
                     key={preset.label}
                     variant={selectedDuration === preset.label ? "default" : "outline"}
@@ -215,6 +221,24 @@ const CreatePortal = () => {
                     </div>
                   </Button>
                 ))}
+              </div>
+              
+              {/* Custom option centered below */}
+              <div className="flex justify-center">
+                <Button
+                  variant={selectedDuration === "Custom" ? "default" : "outline"}
+                  className={`h-16 text-base transition-all w-48 ${
+                    selectedDuration === "Custom"
+                      ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                      : ""
+                  }`}
+                  onClick={() => handleDurationSelect(DURATION_PRESETS.find(p => p.custom)!)}
+                >
+                  <div className="flex flex-col items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span>Custom</span>
+                  </div>
+                </Button>
               </div>
 
               {showCustomDate && (
@@ -280,7 +304,7 @@ const CreatePortal = () => {
                   <input
                     id="media"
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/png,image/jpeg,image/jpg,image/heic,image/webp,video/*"
                     multiple
                     onChange={handleImageUpload}
                     className="hidden"
@@ -320,7 +344,7 @@ const CreatePortal = () => {
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="What makes this moment special? How do you feel right now?"
+                  placeholder="Speak your mind, let all your thoughts loose."
                   rows={5}
                   maxLength={1000}
                   className="bg-background/50 backdrop-blur-sm border-foreground/20"
@@ -384,8 +408,9 @@ const CreatePortal = () => {
                   onClick={handleFinish} 
                   className="flex-1 h-12 text-base"
                   size="lg"
+                  disabled={isCreating}
                 >
-                  Seal Portal
+                  {isCreating ? "Sealing..." : "Seal Portal"}
                 </Button>
               </div>
             </div>
