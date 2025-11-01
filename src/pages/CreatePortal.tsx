@@ -35,6 +35,8 @@ const CreatePortal = () => {
   const [description, setDescription] = useState("");
   const [finalNotes, setFinalNotes] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [sealingProgress, setSealingProgress] = useState(0);
+  const [unlockTime, setUnlockTime] = useState("00:00");
 
   useEffect(() => {
     // Check if user is authenticated
@@ -107,11 +109,29 @@ const CreatePortal = () => {
     
     try {
       setIsCreating(true);
+      setSealingProgress(0);
       console.log("Starting portal creation...");
+      
+      // Simulate sealing progress
+      const progressInterval = setInterval(() => {
+        setSealingProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 150);
+      
+      // Combine date and time
+      const [hours, minutes] = unlockTime.split(':');
+      const combinedDate = new Date(unlockDate);
+      combinedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
       const portal: Omit<Portal, "id"> = {
         title: title.trim(),
         description: description.trim(),
-        unlockDate,
+        unlockDate: combinedDate.toISOString(),
         createdAt: new Date().toISOString(),
         images,
         notes: finalNotes.trim(),
@@ -122,8 +142,14 @@ const CreatePortal = () => {
       const id = await savePortal(portal);
       console.log("Portal saved with ID:", id);
       
+      clearInterval(progressInterval);
+      setSealingProgress(100);
+      
+      // Brief pause to show 100%
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       if (id) {
-        toast.success("Portal created successfully!");
+        toast.success("Portal sealed successfully! 🌟");
         navigate("/");
       } else {
         toast.error("Failed to create portal. Please try again.");
@@ -133,6 +159,7 @@ const CreatePortal = () => {
       toast.error("An error occurred while creating the portal.");
     } finally {
       setIsCreating(false);
+      setSealingProgress(0);
     }
   };
 
@@ -261,8 +288,19 @@ const CreatePortal = () => {
               )}
 
               {unlockDate && (
-                <div className="text-center text-sm text-muted-foreground animate-fade-in">
-                  Opens on {format(new Date(unlockDate), "MMMM dd, yyyy")}
+                <div className="space-y-3 animate-fade-in">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Select Time</Label>
+                    <Input
+                      type="time"
+                      value={unlockTime}
+                      onChange={(e) => setUnlockTime(e.target.value)}
+                      className="text-center text-lg h-14 bg-background/50 backdrop-blur-sm border-foreground/20"
+                    />
+                  </div>
+                  <div className="text-center text-sm text-muted-foreground">
+                    Opens on {format(new Date(unlockDate), "MMMM dd, yyyy")} at {unlockTime}
+                  </div>
                 </div>
               )}
               
@@ -395,23 +433,41 @@ const CreatePortal = () => {
                 autoFocus
               />
               
-              <div className="flex gap-3">
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setStep(3)}
-                  className="flex-1 h-12"
-                  size="lg"
-                >
-                  Back
-                </Button>
-                <Button 
-                  onClick={handleFinish} 
-                  className="flex-1 h-12 text-base"
-                  size="lg"
-                  disabled={isCreating}
-                >
-                  {isCreating ? "Sealing..." : "Seal Portal"}
-                </Button>
+              <div className="space-y-4">
+                {/* Progress bar */}
+                {isCreating && (
+                  <div className="space-y-2 animate-fade-in">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-foreground transition-all duration-300 ease-out"
+                        style={{ width: `${sealingProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-center text-sm text-muted-foreground">
+                      Sealing portal... {sealingProgress}%
+                    </p>
+                  </div>
+                )}
+                
+                <div className="flex gap-3">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setStep(3)}
+                    className="flex-1 h-12"
+                    size="lg"
+                    disabled={isCreating}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={handleFinish} 
+                    className="flex-1 h-12 text-base"
+                    size="lg"
+                    disabled={isCreating}
+                  >
+                    {isCreating ? "Sealing..." : "Seal Portal"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
