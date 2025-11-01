@@ -4,6 +4,7 @@ import { getPortals, migrateLocalStorageToSupabase } from "@/lib/supabaseStorage
 import { Portal } from "@/types/portal";
 import PortalCard from "@/components/PortalCard";
 import Layout from "@/components/Layout";
+import LoadingScreen from "@/components/LoadingScreen";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,30 +12,35 @@ import { supabase } from "@/integrations/supabase/client";
 const Home = () => {
   const [portals, setPortals] = useState<Portal[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     // Check auth and migrate data
     const initAuth = async () => {
+      setIsLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
       
       if (session) {
         await migrateLocalStorageToSupabase();
-        loadPortals();
+        await loadPortals();
       }
+      setIsLoading(false);
     };
 
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setIsLoading(true);
       setIsAuthenticated(!!session);
       if (session) {
         await migrateLocalStorageToSupabase();
-        loadPortals();
+        await loadPortals();
       } else {
         setPortals([]);
       }
+      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -54,6 +60,10 @@ const Home = () => {
     const interval = setInterval(loadPortals, 60000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
+
+  if (isLoading) {
+    return <LoadingScreen text="Loading your portals..." />;
+  }
 
   return (
     <Layout>

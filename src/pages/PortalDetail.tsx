@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
+import LoadingScreen from "@/components/LoadingScreen";
 import { getPortals, deletePortal, updatePortal } from "@/lib/supabaseStorage";
 import { Portal } from "@/types/portal";
 import { Card } from "@/components/ui/card";
@@ -25,6 +26,7 @@ const PortalDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [portal, setPortal] = useState<Portal | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
@@ -32,6 +34,7 @@ const PortalDetail = () => {
 
   useEffect(() => {
     const loadPortal = async () => {
+      setIsLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
@@ -50,6 +53,7 @@ const PortalDetail = () => {
           setTimeout(() => setShowUnlockAnimation(false), 1500);
         }
       }
+      setIsLoading(false);
     };
 
     loadPortal();
@@ -102,6 +106,10 @@ const PortalDetail = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  if (isLoading) {
+    return <LoadingScreen text="Loading portal..." />;
+  }
 
   if (!portal) {
     return (
