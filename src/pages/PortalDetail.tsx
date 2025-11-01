@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import { getPortals, deletePortal, updatePortal } from "@/lib/storage";
+import { getPortals, deletePortal, updatePortal } from "@/lib/supabaseStorage";
 import { Portal } from "@/types/portal";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Trash2, Lock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,19 +31,29 @@ const PortalDetail = () => {
   const [thenNowImage, setThenNowImage] = useState<string | null>(null);
 
   useEffect(() => {
-    const portals = getPortals();
-    const found = portals.find((p) => p.id === id);
-    if (found) {
-      setPortal(found);
-      const unlocked = new Date() >= new Date(found.unlockDate);
-      setIsUnlocked(unlocked);
-      if (unlocked && !sessionStorage.getItem(`unlocked-${id}`)) {
-        setShowUnlockAnimation(true);
-        sessionStorage.setItem(`unlocked-${id}`, "true");
-        setTimeout(() => setShowUnlockAnimation(false), 1500);
+    const loadPortal = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
       }
-    }
-  }, [id]);
+
+      const portals = await getPortals();
+      const found = portals.find((p) => p.id === id);
+      if (found) {
+        setPortal(found);
+        const unlocked = new Date() >= new Date(found.unlockDate);
+        setIsUnlocked(unlocked);
+        if (unlocked && !sessionStorage.getItem(`unlocked-${id}`)) {
+          setShowUnlockAnimation(true);
+          sessionStorage.setItem(`unlocked-${id}`, "true");
+          setTimeout(() => setShowUnlockAnimation(false), 1500);
+        }
+      }
+    };
+
+    loadPortal();
+  }, [id, navigate]);
 
   useEffect(() => {
     if (!portal || isUnlocked) return;
@@ -73,9 +84,9 @@ const PortalDetail = () => {
     return () => clearInterval(interval);
   }, [portal, isUnlocked]);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (portal) {
-      deletePortal(portal.id);
+      await deletePortal(portal.id);
       toast.success("Portal deleted");
       navigate("/");
     }

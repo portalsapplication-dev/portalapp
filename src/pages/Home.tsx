@@ -1,28 +1,59 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { getPortals } from "@/lib/storage";
+import { Link, useNavigate } from "react-router-dom";
+import { getPortals, migrateLocalStorageToSupabase } from "@/lib/supabaseStorage";
 import { Portal } from "@/types/portal";
 import PortalCard from "@/components/PortalCard";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Home = () => {
   const [portals, setPortals] = useState<Portal[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const loadPortals = () => {
-      const stored = getPortals();
-      const sortedPortals = stored.sort(
-        (a, b) => new Date(a.unlockDate).getTime() - new Date(b.unlockDate).getTime()
-      );
-      setPortals(sortedPortals);
+    // Check auth and migrate data
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      
+      if (session) {
+        await migrateLocalStorageToSupabase();
+        loadPortals();
+      }
     };
 
-    loadPortals();
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setIsAuthenticated(!!session);
+      if (session) {
+        await migrateLocalStorageToSupabase();
+        loadPortals();
+      } else {
+        setPortals([]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadPortals = async () => {
+    const stored = await getPortals();
+    const sortedPortals = stored.sort(
+      (a, b) => new Date(a.unlockDate).getTime() - new Date(b.unlockDate).getTime()
+    );
+    setPortals(sortedPortals);
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
     const interval = setInterval(loadPortals, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <Layout>
@@ -45,7 +76,18 @@ const Home = () => {
           </Link>
         </div>
 
-      {portals.length === 0 ? (
+      {!isAuthenticated ? (
+        <div className="text-center py-20 space-y-4 animate-fade-in">
+          <p className="text-muted-foreground text-lg">Sign in to view your portals</p>
+          <Button 
+            onClick={() => navigate("/auth")}
+            className="bg-foreground text-background hover:bg-foreground/90 shadow-lg hover:shadow-xl transition-all h-14 px-8 text-lg"
+            size="lg"
+          >
+            Sign In
+          </Button>
+        </div>
+      ) : portals.length === 0 ? (
         <div className="text-center py-20 space-y-4 animate-fade-in">
           <p className="text-muted-foreground text-lg">No portals yet</p>
           <Link to="/create">

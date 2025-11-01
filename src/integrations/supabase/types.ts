@@ -70,28 +70,34 @@ export type Database = {
       }
       skill_nodes: {
         Row: {
-          completed: boolean | null
           created_at: string
           id: string
-          name: string
+          is_achieved: boolean | null
           parent_id: string | null
+          title: string
           user_id: string
+          x: number | null
+          y: number | null
         }
         Insert: {
-          completed?: boolean | null
           created_at?: string
           id?: string
-          name: string
+          is_achieved?: boolean | null
           parent_id?: string | null
+          title: string
           user_id: string
+          x?: number | null
+          y?: number | null
         }
         Update: {
-          completed?: boolean | null
           created_at?: string
           id?: string
-          name?: string
+          is_achieved?: boolean | null
           parent_id?: string | null
+          title?: string
           user_id?: string
+          x?: number | null
+          y?: number | null
         }
         Relationships: [
           {

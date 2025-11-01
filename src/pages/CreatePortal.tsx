@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { savePortal } from "@/lib/storage";
+import { savePortal } from "@/lib/supabaseStorage";
 import { Portal } from "@/types/portal";
 import { Calendar, ArrowRight, Upload, X, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { addDays, addWeeks, addMonths, addYears, format } from "date-fns";
 import portalLogo from "@/assets/portal-logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
 const DURATION_PRESETS = [
   { label: "1 Day", days: 1 },
@@ -33,6 +34,16 @@ const CreatePortal = () => {
   const [images, setImages] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [finalNotes, setFinalNotes] = useState("");
+
+  useEffect(() => {
+    // Check if user is authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        toast.error("Please sign in to create a portal");
+        navigate("/auth");
+      }
+    });
+  }, [navigate]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -90,9 +101,8 @@ const CreatePortal = () => {
     setStep(step + 1);
   };
 
-  const handleFinish = () => {
-    const portal: Portal = {
-      id: crypto.randomUUID(),
+  const handleFinish = async () => {
+    const portal: Omit<Portal, "id"> = {
       title: title.trim(),
       description: description.trim(),
       unlockDate,
@@ -102,9 +112,13 @@ const CreatePortal = () => {
       isUnlocked: false,
     };
 
-    savePortal(portal);
-    toast.success("Portal created successfully!");
-    navigate("/");
+    const id = await savePortal(portal);
+    if (id) {
+      toast.success("Portal created successfully!");
+      navigate("/");
+    } else {
+      toast.error("Failed to create portal. Please try again.");
+    }
   };
 
   return (

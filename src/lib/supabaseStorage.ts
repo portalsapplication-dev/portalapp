@@ -110,10 +110,12 @@ export const getSkillNodes = async (): Promise<SkillNode[]> => {
 
   return data.map((node) => ({
     id: node.id,
-    name: node.name,
-    parentId: node.parent_id || undefined,
-    completed: node.completed,
+    title: node.title,
+    parentId: node.parent_id || null,
+    isAchieved: node.is_achieved,
     createdAt: node.created_at,
+    x: node.x || 0,
+    y: node.y || 0,
   }));
 };
 
@@ -130,10 +132,12 @@ export const saveSkillNodes = async (nodes: SkillNode[]): Promise<void> => {
     nodes.map((node) => ({
       id: node.id,
       user_id: user.id,
-      name: node.name,
+      title: node.title,
       parent_id: node.parentId || null,
-      completed: node.completed,
+      is_achieved: node.isAchieved,
       created_at: node.createdAt,
+      x: node.x,
+      y: node.y,
     }))
   );
 
@@ -152,9 +156,11 @@ export const addSkillNode = async (
     .from("skill_nodes")
     .insert({
       user_id: user.id,
-      name: node.name,
+      title: node.title,
       parent_id: node.parentId || null,
-      completed: node.completed,
+      is_achieved: node.isAchieved,
+      x: node.x,
+      y: node.y,
     })
     .select()
     .single();
@@ -166,10 +172,12 @@ export const addSkillNode = async (
 
   return {
     id: data.id,
-    name: data.name,
-    parentId: data.parent_id || undefined,
-    completed: data.completed,
+    title: data.title,
+    parentId: data.parent_id || null,
+    isAchieved: data.is_achieved,
     createdAt: data.created_at,
+    x: data.x || 0,
+    y: data.y || 0,
   };
 };
 
@@ -181,9 +189,11 @@ export const updateSkillNode = async (
   if (!user) return;
 
   const updateData: any = {};
-  if (updates.name !== undefined) updateData.name = updates.name;
+  if (updates.title !== undefined) updateData.title = updates.title;
   if (updates.parentId !== undefined) updateData.parent_id = updates.parentId;
-  if (updates.completed !== undefined) updateData.completed = updates.completed;
+  if (updates.isAchieved !== undefined) updateData.is_achieved = updates.isAchieved;
+  if (updates.x !== undefined) updateData.x = updates.x;
+  if (updates.y !== undefined) updateData.y = updates.y;
 
   const { error } = await supabase
     .from("skill_nodes")
@@ -249,10 +259,12 @@ export const migrateLocalStorageToSupabase = async (): Promise<void> => {
         await supabase.from("skill_nodes").insert({
           id: node.id,
           user_id: user.id,
-          name: node.name,
+          title: node.title,
           parent_id: node.parentId || null,
-          completed: node.completed,
+          is_achieved: node.isAchieved,
           created_at: node.createdAt,
+          x: node.x,
+          y: node.y,
         });
       }
       localStorage.removeItem("portals_skill_tree");

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +9,11 @@ import {
   addSkillNode,
   updateSkillNode,
   deleteSkillNode,
-} from "@/lib/skillTreeStorage";
+} from "@/lib/supabaseStorage";
 import { SkillNode as SkillNodeType } from "@/types/skillTree";
 import SkillNode from "@/components/SkillNode";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 // Sound effect for completing a node
 const playCompletionSound = () => {
@@ -39,18 +41,29 @@ const SkillTree = () => {
   const [selectedParent, setSelectedParent] = useState<string | null>(null);
   const [animatedNodes, setAnimatedNodes] = useState<Set<string>>(new Set());
   const svgRef = useRef<SVGSVGElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const loadedNodes = getSkillNodes();
-    setNodes(loadedNodes);
-    
-    // Animate nodes appearing one by one
-    loadedNodes.forEach((node, index) => {
-      setTimeout(() => {
-        setAnimatedNodes((prev) => new Set([...prev, node.id]));
-      }, index * 150);
-    });
-  }, []);
+    const checkAuthAndLoad = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+
+      const loadedNodes = await getSkillNodes();
+      setNodes(loadedNodes);
+      
+      // Animate nodes appearing one by one
+      loadedNodes.forEach((node, index) => {
+        setTimeout(() => {
+          setAnimatedNodes((prev) => new Set([...prev, node.id]));
+        }, index * 150);
+      });
+    };
+
+    checkAuthAndLoad();
+  }, [navigate]);
 
   const calculateNodePosition = (node: SkillNodeType, allNodes: SkillNodeType[]) => {
     const centerX = 400;
@@ -95,16 +108,21 @@ const SkillTree = () => {
     };
   };
 
-  const handleAddNode = () => {
+  const handleAddNode = async () => {
     if (!newNodeTitle.trim()) return;
 
-    const newNode = addSkillNode({
+    const newNode = await addSkillNode({
       title: newNodeTitle,
-      parentId: selectedParent,
+      parentId: selectedParent || null,
       isAchieved: false,
       x: 0,
       y: 0,
     });
+
+    if (!newNode) {
+      toast.error("Failed to add node");
+      return;
+    }
 
     setNodes([...nodes, newNode]);
     setNewNodeTitle("");
@@ -118,11 +136,11 @@ const SkillTree = () => {
     toast.success("Node added");
   };
 
-  const handleToggleAchieved = (id: string) => {
+  const handleToggleAchieved = async (id: string) => {
     const node = nodes.find((n) => n.id === id);
     if (node) {
       const newState = !node.isAchieved;
-      updateSkillNode(id, { isAchieved: newState });
+      await updateSkillNode(id, { isAchieved: newState });
       setNodes(
         nodes.map((n) =>
           n.id === id ? { ...n, isAchieved: newState } : n
@@ -142,13 +160,13 @@ const SkillTree = () => {
     }
   };
 
-  const handleUpdateTitle = (id: string, title: string) => {
-    updateSkillNode(id, { title });
+  const handleUpdateTitle = async (id: string, title: string) => {
+    await updateSkillNode(id, { title });
     setNodes(nodes.map((n) => (n.id === id ? { ...n, title } : n)));
   };
 
-  const handleDelete = (id: string) => {
-    deleteSkillNode(id);
+  const handleDelete = async (id: string) => {
+    await deleteSkillNode(id);
     setNodes(nodes.filter((n) => n.id !== id && n.parentId !== id));
     toast.success("Node deleted");
   };
