@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./components/SplashScreen";
 import SkillTree from "./pages/SkillTree";
+import Journey from "./pages/Journey";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => {
             <Route path="/create" element={<CreatePortal />} />
             <Route path="/portal/:id" element={<PortalDetail />} />
             <Route path="/skill-tree" element={<SkillTree />} />
+            <Route path="/journey" element={<Journey />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />

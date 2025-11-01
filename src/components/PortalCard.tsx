@@ -81,6 +81,13 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
         <Trash2 className="w-4 h-4" />
       </Button>
 
+      {/* Opened badge */}
+      {isUnlocked && hasBeenOpened && (
+        <div className="absolute -top-2 -left-2 z-10 bg-foreground text-background text-xs font-semibold px-2 py-1 rounded-full shadow-lg animate-fade-in">
+          Opened
+        </div>
+      )}
+
       <Link to={`/portal/${portal.id}`} className="block group">
         <div className="relative aspect-square">
           {/* Outer glow - CSS only, no images */}

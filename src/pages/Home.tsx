@@ -88,14 +88,32 @@ const Home = () => {
     return <LoadingScreen text="Loading your portals..." />;
   }
 
+  const quotes = [
+    "Time reveals everything.",
+    "Every moment is a portal to your future self.",
+    "Memories are the architecture of our identity.",
+    "Your journey is uniquely yours.",
+    "Small steps today, great strides tomorrow.",
+  ];
+
+  const [currentQuote, setCurrentQuote] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated || portals.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentQuote((prev) => (prev + 1) % quotes.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, portals.length]);
+
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4 mb-8 animate-fade-in">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-foreground">Your Portals</h1>
-            <p className="text-muted-foreground italic">
-              "Time reveals everything."
+            <p className="text-muted-foreground italic transition-opacity duration-500">
+              "{quotes[currentQuote]}"
             </p>
           </div>
           <Link to="/create">
@@ -129,7 +147,7 @@ const Home = () => {
           </div>
         </div>
       ) : (
-        <div className="flex justify-center">
+        <div className="flex justify-center items-center flex-1 w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-4 animate-fade-in w-full max-w-6xl">
             {portals.map((portal, index) => (
               <div

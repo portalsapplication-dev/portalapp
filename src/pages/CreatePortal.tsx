@@ -436,7 +436,7 @@ const CreatePortal = () => {
               <div className="space-y-4">
                 {/* Progress bar */}
                 {isCreating && (
-                  <div className="space-y-2 animate-fade-in">
+                  <div className="space-y-3 animate-fade-in">
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-foreground transition-all duration-300 ease-out"
@@ -445,6 +445,9 @@ const CreatePortal = () => {
                     </div>
                     <p className="text-center text-sm text-muted-foreground">
                       Sealing portal... {sealingProgress}%
+                    </p>
+                    <p className="text-center text-sm text-muted-foreground italic animate-pulse">
+                      "Your future self will thank you for this moment."
                     </p>
                   </div>
                 )}

@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Clock, Sparkles, Settings } from "lucide-react";
+import { Clock, Sparkles, Settings, Camera } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
     { path: "/", icon: Clock, label: "Portals" },
+    { path: "/journey", icon: Camera, label: "Journey" },
     { path: "/skill-tree", icon: Sparkles, label: "Skill Tree" },
     { path: "/settings", icon: Settings, label: "Settings" },
   ];

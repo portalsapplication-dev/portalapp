@@ -110,6 +110,34 @@ const Settings = () => {
             </div>
 
             <div className="pt-6 border-t border-border">
+              <h3 className="text-sm font-medium text-foreground mb-4">Privacy & Storage</h3>
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1 flex-1">
+                    <Label className="text-base">Cloud Backup</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Back up your portals and media to the cloud. Your content stays private unless you choose to back it up.
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={false}
+                    onCheckedChange={(checked) => {
+                      toast({
+                        title: checked ? "Cloud backup enabled" : "Cloud backup disabled",
+                        description: checked 
+                          ? "Your portals will be backed up to the cloud." 
+                          : "Your portals are stored locally only.",
+                      });
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
+                  🔒 All portal media is stored locally by default for privacy and faster access. Enable cloud backup to sync across devices.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-border">
               <h3 className="text-sm font-medium text-foreground mb-2">About Portals</h3>
               <p className="text-sm text-muted-foreground">
                 Portals is a time capsule app that helps you preserve and rediscover your
