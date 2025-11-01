@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Moon, Sun, LogOut, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const isDark = localStorage.getItem("theme") === "dark";
@@ -14,6 +21,17 @@ const Settings = () => {
     if (isDark) {
       document.documentElement.classList.add("dark");
     }
+
+    // Check authentication status
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserEmail(session?.user?.email || null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email || null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const toggleDarkMode = (checked: boolean) => {
@@ -27,6 +45,29 @@ const Settings = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      toast({
+        title: "Logged out",
+        description: "You've been successfully logged out.",
+      });
+      navigate("/auth");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleLogin = () => {
+    navigate("/auth");
+  };
+
   return (
     <Layout>
       <div className="max-w-2xl mx-auto">
@@ -37,6 +78,35 @@ const Settings = () => {
 
         <Card className="p-6">
           <div className="space-y-6">
+            {/* Account Section */}
+            <div className="pb-6 border-b border-border">
+              <h3 className="text-sm font-medium text-foreground mb-4">Account</h3>
+              {userEmail ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-foreground">{userEmail}</span>
+                  </div>
+                  <Button
+                    onClick={handleLogout}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Sign in to save your data across devices
+                  </p>
+                  <Button onClick={handleLogin} className="w-full">
+                    Sign In
+                  </Button>
+                </div>
+              )}
+            </div>
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base flex items-center gap-2">

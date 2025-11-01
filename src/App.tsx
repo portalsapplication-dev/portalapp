@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import CreatePortal from "./pages/CreatePortal";
 import PortalDetail from "./pages/PortalDetail";
 import Settings from "./pages/Settings";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./components/SplashScreen";
 import SkillTree from "./pages/SkillTree";
@@ -45,6 +46,7 @@ const App = () => {
             <Route path="/portal/:id" element={<PortalDetail />} />
             <Route path="/skill-tree" element={<SkillTree />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
