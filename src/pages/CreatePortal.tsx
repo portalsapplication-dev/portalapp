@@ -102,22 +102,31 @@ const CreatePortal = () => {
   };
 
   const handleFinish = async () => {
-    const portal: Omit<Portal, "id"> = {
-      title: title.trim(),
-      description: description.trim(),
-      unlockDate,
-      createdAt: new Date().toISOString(),
-      images,
-      notes: finalNotes.trim(),
-      isUnlocked: false,
-    };
+    try {
+      console.log("Starting portal creation...");
+      const portal: Omit<Portal, "id"> = {
+        title: title.trim(),
+        description: description.trim(),
+        unlockDate,
+        createdAt: new Date().toISOString(),
+        images,
+        notes: finalNotes.trim(),
+        isUnlocked: false,
+      };
 
-    const id = await savePortal(portal);
-    if (id) {
-      toast.success("Portal created successfully!");
-      navigate("/");
-    } else {
-      toast.error("Failed to create portal. Please try again.");
+      console.log("Portal data:", portal);
+      const id = await savePortal(portal);
+      console.log("Portal saved with ID:", id);
+      
+      if (id) {
+        toast.success("Portal created successfully!");
+        navigate("/");
+      } else {
+        toast.error("Failed to create portal. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error in handleFinish:", error);
+      toast.error("An error occurred while creating the portal.");
     }
   };
 
@@ -158,21 +167,23 @@ const CreatePortal = () => {
                 onKeyDown={(e) => e.key === "Enter" && handleNextStep()}
               />
               
-              <Button 
-                onClick={handleNextStep} 
-                className="w-full h-12 text-base"
-                size="lg"
-              >
-                Continue <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate("/")}
-                className="w-full"
-              >
-                Cancel
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigate("/")}
+                  className="flex-1 h-12"
+                  size="lg"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleNextStep} 
+                  className="flex-1 h-12 text-base"
+                  size="lg"
+                >
+                  Continue <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -231,22 +242,24 @@ const CreatePortal = () => {
                 </div>
               )}
               
-              <Button 
-                onClick={handleNextStep} 
-                className="w-full h-12 text-base"
-                size="lg"
-                disabled={!unlockDate}
-              >
-                Continue <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                onClick={() => setStep(1)}
-                className="w-full"
-              >
-                Back
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setStep(1)}
+                  className="flex-1 h-12"
+                  size="lg"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={handleNextStep} 
+                  className="flex-1 h-12 text-base"
+                  size="lg"
+                  disabled={!unlockDate}
+                >
+                  Continue <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -315,22 +328,24 @@ const CreatePortal = () => {
               </div>
             </div>
             
-            <div className="space-y-3 pt-4">
-              <Button 
-                onClick={handleNextStep} 
-                className="w-full h-12 text-base"
-                size="lg"
-              >
-                Continue <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                onClick={() => setStep(2)}
-                className="w-full"
-              >
-                Back
-              </Button>
+            <div className="pt-4">
+              <div className="flex gap-3">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setStep(2)}
+                  className="flex-1 h-12"
+                  size="lg"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={handleNextStep} 
+                  className="flex-1 h-12 text-base"
+                  size="lg"
+                >
+                  Continue <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -356,21 +371,23 @@ const CreatePortal = () => {
                 autoFocus
               />
               
-              <Button 
-                onClick={handleFinish} 
-                className="w-full h-12 text-base"
-                size="lg"
-              >
-                Seal Portal
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                onClick={() => setStep(3)}
-                className="w-full"
-              >
-                Back
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setStep(3)}
+                  className="flex-1 h-12"
+                  size="lg"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={handleFinish} 
+                  className="flex-1 h-12 text-base"
+                  size="lg"
+                >
+                  Seal Portal
+                </Button>
+              </div>
             </div>
           </div>
         )}
