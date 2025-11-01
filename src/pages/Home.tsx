@@ -35,22 +35,30 @@ const Home = () => {
         </div>
 
         {portals.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4">
-            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
-              <Package className="w-10 h-10 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center py-20 px-4 animate-fade-in">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-muted to-accent flex items-center justify-center mb-6 animate-float shadow-xl">
+              <Package className="w-12 h-12 text-foreground" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">No portals yet</h2>
-            <p className="text-muted-foreground mb-6 text-center max-w-sm">
+            <h2 className="text-2xl font-bold text-foreground mb-3 animate-slide-up">No portals yet</h2>
+            <p className="text-muted-foreground mb-8 text-center max-w-sm animate-fade-in" style={{ animationDelay: "0.2s" }}>
               Create your first time portal to store memories for your future self
             </p>
             <Link to="/create">
-              <Button>Create Your First Portal</Button>
+              <Button className="animate-fade-in-scale" style={{ animationDelay: "0.4s" }}>
+                Create Your First Portal
+              </Button>
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {portals.map((portal) => (
-              <PortalCard key={portal.id} portal={portal} />
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+            {portals.map((portal, index) => (
+              <div
+                key={portal.id}
+                className="animate-fade-in-scale"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <PortalCard portal={portal} />
+              </div>
             ))}
           </div>
         )}

@@ -66,15 +66,15 @@ const CreatePortal = () => {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
+      <div className="max-w-2xl mx-auto animate-fade-in">
+        <div className="mb-8 animate-slide-up">
           <h1 className="text-3xl font-bold text-foreground mb-2">Create Portal</h1>
           <p className="text-muted-foreground">
             Store your memories for the future
           </p>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 animate-fade-in-scale" style={{ animationDelay: "0.2s" }}>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
