@@ -46,6 +46,7 @@ All colors MUST be HSL.
     
     --gradient-portal: radial-gradient(circle, hsl(0 0% 100%) 0%, hsl(0 0% 90%) 50%, hsl(0 0% 70%) 100%);
     --gradient-shimmer: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.3), transparent);
+    --gradient-portal-open: radial-gradient(circle, hsl(0 0% 100% / 0.8) 0%, hsl(0 0% 50% / 0.4) 50%, transparent 100%);
   }
 
   .dark {
@@ -83,6 +84,7 @@ All colors MUST be HSL.
     
     --gradient-portal: radial-gradient(circle, hsl(0 0% 10%) 0%, hsl(0 0% 20%) 50%, hsl(0 0% 40%) 100%);
     --gradient-shimmer: linear-gradient(90deg, transparent, hsl(0 0% 0% / 0.3), transparent);
+    --gradient-portal-open: radial-gradient(circle, hsl(0 0% 100% / 0.1) 0%, hsl(0 0% 50% / 0.05) 50%, transparent 100%);
   }
 }
 

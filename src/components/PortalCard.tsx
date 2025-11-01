@@ -48,44 +48,44 @@ const PortalCard = ({ portal }: PortalCardProps) => {
   return (
     <Link to={`/portal/${portal.id}`} className="block group">
       <div className="relative aspect-square">
-        {/* Outer glow ring */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/20 via-foreground/10 to-transparent animate-portal-pulse blur-xl" />
+        {/* Outer glow */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/10 via-foreground/5 to-transparent animate-portal-pulse blur-2xl" />
         
-        {/* Portal outer ring */}
-        <div className="absolute inset-0 rounded-full border-4 border-foreground/30 group-hover:border-foreground/50 transition-all duration-500" />
+        {/* Thin portal ring - sci-fi style */}
+        <div className="absolute inset-0 rounded-full border border-foreground/40 group-hover:border-foreground/60 transition-all duration-500 shadow-[0_0_20px_hsl(var(--foreground)/0.2)]" />
         
-        {/* Spinning orbital ring */}
-        <div className="absolute inset-4 rounded-full border-2 border-dashed border-foreground/20 animate-portal-spin" />
+        {/* Inner spinning ring */}
+        <div className="absolute inset-2 rounded-full border border-dashed border-foreground/20 animate-portal-spin" style={{ animationDuration: '30s' }} />
         
         {/* Portal center - clickable area */}
-        <div className="absolute inset-8 rounded-full bg-gradient-to-br from-background via-muted to-accent overflow-hidden group-hover:scale-105 transition-transform duration-500 shadow-2xl">
+        <div className="absolute inset-6 rounded-full bg-gradient-to-br from-background/80 via-muted/50 to-transparent backdrop-blur-sm overflow-hidden group-hover:scale-105 transition-transform duration-500">
           {/* Inner shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/5 to-transparent animate-shimmer" 
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/3 to-transparent animate-shimmer" 
                style={{ backgroundSize: "200% 200%" }} />
           
           {/* Content */}
-          <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
+          <div className="relative h-full flex flex-col items-center justify-center p-4 text-center">
             {/* Lock/Unlock icon */}
-            <div className={`mb-3 p-3 rounded-full transition-all duration-300 ${
+            <div className={`mb-2 p-2 rounded-full transition-all duration-300 ${
               isUnlocked 
                 ? "bg-foreground/10 group-hover:scale-110 animate-float" 
-                : "bg-muted"
+                : "bg-muted/50"
             }`}>
               {isUnlocked ? (
-                <Unlock className="w-6 h-6 text-foreground" />
+                <Unlock className="w-5 h-5 text-foreground" />
               ) : (
-                <Lock className="w-6 h-6 text-muted-foreground" />
+                <Lock className="w-5 h-5 text-muted-foreground" />
               )}
             </div>
 
             {/* Title */}
-            <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-foreground/80 transition-colors">
+            <h3 className="text-base font-semibold text-foreground mb-1 line-clamp-2 group-hover:text-foreground/80 transition-colors">
               {portal.title}
             </h3>
 
             {/* Countdown */}
-            <div className="flex items-center gap-1.5 text-sm">
-              <Clock className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-center gap-1 text-xs">
+              <Clock className="w-3 h-3 text-muted-foreground" />
               <span className={`font-medium ${isUnlocked ? "text-foreground animate-pulse" : "text-muted-foreground"}`}>
                 {isUnlocked ? "Ready" : timeLeft}
               </span>
@@ -93,9 +93,9 @@ const PortalCard = ({ portal }: PortalCardProps) => {
 
             {/* Progress ring for locked portals */}
             {!isUnlocked && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-16 h-1 bg-muted rounded-full overflow-hidden">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-muted/50 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-foreground transition-all duration-1000 rounded-full"
+                  className="h-full bg-foreground/60 transition-all duration-1000 rounded-full"
                   style={{
                     width: `${Math.min(
                       100,
@@ -108,17 +108,21 @@ const PortalCard = ({ portal }: PortalCardProps) => {
               </div>
             )}
 
-            {/* Unlocked indicator */}
+            {/* Unlocked glow */}
             {isUnlocked && (
-              <div className="absolute inset-0 border-4 border-foreground/20 rounded-full animate-glow-pulse" />
+              <div className="absolute inset-0 border-2 border-foreground/15 rounded-full animate-glow-pulse" />
             )}
           </div>
         </div>
-
-        {/* Corner timestamp */}
-        <div className="absolute -bottom-2 -right-2 bg-background border border-border rounded-full px-3 py-1 text-xs text-muted-foreground shadow-lg">
-          {new Date(portal.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-        </div>
+      </div>
+      
+      {/* Unlock date below portal */}
+      <div className="text-center mt-3 text-xs text-muted-foreground">
+        {new Date(portal.unlockDate).toLocaleDateString(undefined, { 
+          month: 'short', 
+          day: 'numeric',
+          year: 'numeric'
+        })}
       </div>
     </Link>
   );

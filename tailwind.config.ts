@@ -113,6 +113,15 @@ export default {
           "0%": { transform: "scale(0.5)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        "portal-open": {
+          "0%": { transform: "scale(0.8)", opacity: "0", filter: "blur(10px)" },
+          "50%": { transform: "scale(1.1)", opacity: "0.5", filter: "blur(5px)" },
+          "100%": { transform: "scale(1)", opacity: "1", filter: "blur(0px)" },
+        },
+        "swirl": {
+          "0%": { transform: "rotate(0deg) scale(0.5)", opacity: "0" },
+          "100%": { transform: "rotate(360deg) scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -127,6 +136,8 @@ export default {
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "slide-up": "slide-up 0.5s ease-out",
         "zoom-in": "zoom-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "portal-open": "portal-open 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "swirl": "swirl 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
