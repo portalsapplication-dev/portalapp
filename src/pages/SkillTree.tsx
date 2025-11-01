@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import {
   getSkillNodes,
   addSkillNode,
@@ -13,14 +13,87 @@ import { SkillNode as SkillNodeType } from "@/types/skillTree";
 import SkillNode from "@/components/SkillNode";
 import { toast } from "sonner";
 
+// Sound effect for completing a node
+const playCompletionSound = () => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+  oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+  oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+  
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+  
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.5);
+};
+
 const SkillTree = () => {
   const [nodes, setNodes] = useState<SkillNodeType[]>([]);
   const [newNodeTitle, setNewNodeTitle] = useState("");
   const [selectedParent, setSelectedParent] = useState<string | null>(null);
+  const [animatedNodes, setAnimatedNodes] = useState<Set<string>>(new Set());
+  const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    setNodes(getSkillNodes());
+    const loadedNodes = getSkillNodes();
+    setNodes(loadedNodes);
+    
+    // Animate nodes appearing one by one
+    loadedNodes.forEach((node, index) => {
+      setTimeout(() => {
+        setAnimatedNodes((prev) => new Set([...prev, node.id]));
+      }, index * 150);
+    });
   }, []);
+
+  const calculateNodePosition = (node: SkillNodeType, allNodes: SkillNodeType[]) => {
+    const centerX = 400;
+    const centerY = 300;
+    
+    if (!node.parentId) {
+      // Root nodes in center
+      const rootNodes = allNodes.filter(n => !n.parentId);
+      const rootIndex = rootNodes.findIndex(n => n.id === node.id);
+      const angle = (rootIndex / rootNodes.length) * Math.PI * 2;
+      const radius = 80;
+      return {
+        x: centerX + Math.cos(angle) * radius,
+        y: centerY + Math.sin(angle) * radius
+      };
+    }
+    
+    // Child nodes radiate outward
+    const parent = allNodes.find(n => n.id === node.parentId);
+    if (!parent) return { x: centerX, y: centerY };
+    
+    const siblings = allNodes.filter(n => n.parentId === node.parentId);
+    const siblingIndex = siblings.findIndex(n => n.id === node.id);
+    const parentPos = calculateNodePosition(parent, allNodes);
+    
+    // Calculate depth level
+    let depth = 1;
+    let currentParent = parent;
+    while (currentParent.parentId) {
+      depth++;
+      currentParent = allNodes.find(n => n.id === currentParent.parentId)!;
+    }
+    
+    const radius = 80 + depth * 120;
+    const angleSpread = Math.PI / 3;
+    const angle = Math.atan2(parentPos.y - centerY, parentPos.x - centerX) + 
+                  (siblingIndex - siblings.length / 2 + 0.5) * angleSpread / siblings.length;
+    
+    return {
+      x: centerX + Math.cos(angle) * radius,
+      y: centerY + Math.sin(angle) * radius
+    };
+  };
 
   const handleAddNode = () => {
     if (!newNodeTitle.trim()) return;
@@ -36,18 +109,36 @@ const SkillTree = () => {
     setNodes([...nodes, newNode]);
     setNewNodeTitle("");
     setSelectedParent(null);
+    
+    // Animate new node
+    setTimeout(() => {
+      setAnimatedNodes((prev) => new Set([...prev, newNode.id]));
+    }, 50);
+    
     toast.success("Node added");
   };
 
   const handleToggleAchieved = (id: string) => {
     const node = nodes.find((n) => n.id === id);
     if (node) {
-      updateSkillNode(id, { isAchieved: !node.isAchieved });
+      const newState = !node.isAchieved;
+      updateSkillNode(id, { isAchieved: newState });
       setNodes(
         nodes.map((n) =>
-          n.id === id ? { ...n, isAchieved: !n.isAchieved } : n
+          n.id === id ? { ...n, isAchieved: newState } : n
         )
       );
+      
+      if (newState) {
+        playCompletionSound();
+        toast.success(
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-yellow-500" />
+            <span>Congratulations! Skill unlocked: {node.title}</span>
+          </div>,
+          { duration: 3000 }
+        );
+      }
     }
   };
 
@@ -62,79 +153,17 @@ const SkillTree = () => {
     toast.success("Node deleted");
   };
 
-  const renderTree = (parentId: string | null, level = 0) => {
-    const children = nodes.filter((n) => n.parentId === parentId);
-    if (children.length === 0) return null;
-
-    return (
-      <div className="relative space-y-8" style={{ marginLeft: level * 60 }}>
-        {children.map((node, index) => {
-          const hasChildren = nodes.some((n) => n.parentId === node.id);
-          
-          return (
-            <div key={node.id} className="relative">
-              {/* Connecting line from parent */}
-              {level > 0 && (
-                <>
-                  {/* Horizontal line */}
-                  <div 
-                    className="absolute -left-12 top-6 w-12 h-[2px] bg-gradient-to-r from-foreground/30 to-foreground/20"
-                    style={{
-                      boxShadow: node.isAchieved ? '0 0 8px hsl(var(--foreground) / 0.4)' : 'none'
-                    }}
-                  />
-                  {/* Vertical line connector */}
-                  {index !== 0 && (
-                    <div 
-                      className="absolute -left-12 top-6 w-[2px] bg-gradient-to-b from-foreground/20 to-transparent"
-                      style={{
-                        height: 'calc(100% + 32px)',
-                        top: `-${32 + (index * 8)}px`
-                      }}
-                    />
-                  )}
-                </>
-              )}
-              
-              <SkillNode
-                node={node}
-                onToggleAchieved={handleToggleAchieved}
-                onUpdateTitle={handleUpdateTitle}
-                onDelete={handleDelete}
-                onAddChild={setSelectedParent}
-              />
-              
-              {/* Branch indicator line going down */}
-              {hasChildren && (
-                <div 
-                  className="absolute left-8 top-12 w-[2px] h-6 bg-gradient-to-b from-foreground/20 to-transparent"
-                  style={{
-                    boxShadow: node.isAchieved ? '0 0 6px hsl(var(--foreground) / 0.3)' : 'none'
-                  }}
-                />
-              )}
-              
-              {renderTree(node.id, level + 1)}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const rootNodes = nodes.filter((n) => n.parentId === null);
-
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto space-y-8 animate-fade-in pb-20">
-        <div className="text-center space-y-2">
+      <div className="w-full h-[calc(100vh-8rem)] flex flex-col animate-fade-in pb-20">
+        <div className="text-center space-y-2 py-6">
           <h1 className="text-4xl font-bold text-foreground">Skill Tree</h1>
           <p className="text-muted-foreground italic">
             "Every branch is growth."
           </p>
         </div>
 
-        <div className="flex gap-2 sticky top-4 z-10 bg-background/80 backdrop-blur-sm p-4 rounded-lg border border-foreground/10">
+        <div className="flex gap-2 mx-4 z-10 bg-background/80 backdrop-blur-sm p-4 rounded-lg border border-foreground/10">
           <Input
             placeholder={
               selectedParent 
@@ -160,31 +189,147 @@ const SkillTree = () => {
           )}
         </div>
 
-        <div className="min-h-[500px] relative">
-          {rootNodes.length === 0 ? (
-            <div className="text-center py-32 text-muted-foreground animate-fade-in space-y-4">
-              <div className="w-24 h-24 mx-auto rounded-full border-2 border-dashed border-foreground/20 flex items-center justify-center">
-                <Plus className="w-8 h-8 text-foreground/30" />
+        <div className="flex-1 relative overflow-hidden">
+          {nodes.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-muted-foreground animate-fade-in space-y-4">
+                <div className="w-24 h-24 mx-auto rounded-full border-2 border-dashed border-foreground/20 flex items-center justify-center">
+                  <Plus className="w-8 h-8 text-foreground/30" />
+                </div>
+                <p className="text-lg">Start mapping your growth</p>
+                <p className="text-sm">Add your first skill to begin your journey</p>
               </div>
-              <p className="text-lg">Start mapping your growth</p>
-              <p className="text-sm">Add your first skill to begin your journey</p>
             </div>
           ) : (
-            <div className="space-y-12 pt-8">
-              {/* Constellation-style background */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--foreground)/0.03),transparent_50%)]" />
-              </div>
+            <div className="absolute inset-0">
+              {/* Constellation background */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--foreground)/0.05),transparent_70%)]" />
               
-              <div className="relative">
-                {renderTree(null)}
-              </div>
+              <svg
+                ref={svgRef}
+                className="w-full h-full"
+                viewBox="0 0 800 600"
+              >
+                {/* Draw connection lines */}
+                {nodes.map((node) => {
+                  if (!node.parentId) return null;
+                  const parent = nodes.find((n) => n.id === node.parentId);
+                  if (!parent) return null;
+                  
+                  const nodePos = calculateNodePosition(node, nodes);
+                  const parentPos = calculateNodePosition(parent, nodes);
+                  
+                  return (
+                    <line
+                      key={`line-${node.id}`}
+                      x1={parentPos.x}
+                      y1={parentPos.y}
+                      x2={nodePos.x}
+                      y2={nodePos.y}
+                      stroke="hsl(var(--foreground))"
+                      strokeWidth="2"
+                      strokeOpacity={animatedNodes.has(node.id) ? (node.isAchieved ? 0.4 : 0.2) : 0}
+                      className="transition-all duration-500"
+                      style={{
+                        filter: node.isAchieved ? 'drop-shadow(0 0 4px hsl(var(--foreground)/0.5))' : 'none'
+                      }}
+                    />
+                  );
+                })}
+                
+                {/* Draw nodes */}
+                {nodes.map((node) => {
+                  const pos = calculateNodePosition(node, nodes);
+                  const isAnimated = animatedNodes.has(node.id);
+                  
+                  return (
+                    <g
+                      key={node.id}
+                      transform={`translate(${pos.x}, ${pos.y})`}
+                      style={{
+                        opacity: isAnimated ? 1 : 0,
+                        transform: isAnimated ? 'scale(1)' : 'scale(0)',
+                        transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                      }}
+                    >
+                      {/* Outer glow ring for achieved nodes */}
+                      {node.isAchieved && (
+                        <circle
+                          r="32"
+                          fill="none"
+                          stroke="hsl(var(--foreground))"
+                          strokeWidth="2"
+                          opacity="0.3"
+                          className="animate-pulse"
+                        />
+                      )}
+                      
+                      {/* Node circle */}
+                      <circle
+                        r="24"
+                        fill={node.isAchieved ? "hsl(var(--foreground))" : "hsl(var(--background))"}
+                        stroke="hsl(var(--foreground))"
+                        strokeWidth="2"
+                        className="cursor-pointer transition-all duration-300 hover:r-26"
+                        onClick={() => handleToggleAchieved(node.id)}
+                        style={{
+                          filter: node.isAchieved 
+                            ? 'drop-shadow(0 0 12px hsl(var(--foreground)/0.6))' 
+                            : 'drop-shadow(0 0 4px hsl(var(--foreground)/0.2))'
+                        }}
+                      />
+                      
+                      {/* Check mark for achieved */}
+                      {node.isAchieved && (
+                        <path
+                          d="M -8 0 L -3 5 L 8 -6"
+                          stroke="hsl(var(--background))"
+                          strokeWidth="3"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      )}
+                      
+                      {/* Node title */}
+                      <text
+                        y="45"
+                        textAnchor="middle"
+                        fill="hsl(var(--foreground))"
+                        fontSize="12"
+                        className="pointer-events-none select-none"
+                      >
+                        {node.title.length > 15 ? node.title.slice(0, 15) + '...' : node.title}
+                      </text>
+                      
+                      {/* Action buttons on hover */}
+                      <foreignObject
+                        x="-60"
+                        y="-60"
+                        width="120"
+                        height="120"
+                        className="pointer-events-none"
+                      >
+                        <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-auto">
+                          <SkillNode
+                            node={node}
+                            onToggleAchieved={handleToggleAchieved}
+                            onUpdateTitle={handleUpdateTitle}
+                            onDelete={handleDelete}
+                            onAddChild={setSelectedParent}
+                          />
+                        </div>
+                      </foreignObject>
+                    </g>
+                  );
+                })}
+              </svg>
             </div>
           )}
         </div>
 
         {/* Footer quote */}
-        <div className="text-center pt-8 pb-4 text-sm text-muted-foreground italic opacity-60">
+        <div className="text-center pt-4 pb-4 text-sm text-muted-foreground italic opacity-60">
           Growth is not instant, but it's visible.
         </div>
       </div>

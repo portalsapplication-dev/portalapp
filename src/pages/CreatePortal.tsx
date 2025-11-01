@@ -6,14 +6,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { savePortal } from "@/lib/storage";
 import { Portal } from "@/types/portal";
-import { Calendar, ArrowRight, Upload, X } from "lucide-react";
+import { Calendar, ArrowRight, Upload, X, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { addDays, addWeeks, addMonths, addYears, format } from "date-fns";
+import portalLogo from "@/assets/portal-logo.png";
+
+const DURATION_PRESETS = [
+  { label: "1 Day", days: 1 },
+  { label: "3 Days", days: 3 },
+  { label: "5 Days", days: 5 },
+  { label: "1 Week", weeks: 1 },
+  { label: "1 Month", months: 1 },
+  { label: "3 Months", months: 3 },
+  { label: "6 Months", months: 6 },
+  { label: "1 Year", years: 1 },
+  { label: "Custom", custom: true },
+];
 
 const CreatePortal = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
+  const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [unlockDate, setUnlockDate] = useState("");
+  const [showCustomDate, setShowCustomDate] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [finalNotes, setFinalNotes] = useState("");
@@ -35,6 +51,24 @@ const CreatePortal = () => {
 
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDurationSelect = (preset: typeof DURATION_PRESETS[0]) => {
+    if (preset.custom) {
+      setShowCustomDate(true);
+      setSelectedDuration(preset.label);
+      return;
+    }
+
+    let date = new Date();
+    if (preset.days) date = addDays(date, preset.days);
+    if (preset.weeks) date = addWeeks(date, preset.weeks);
+    if (preset.months) date = addMonths(date, preset.months);
+    if (preset.years) date = addYears(date, preset.years);
+
+    setUnlockDate(date.toISOString().split("T")[0]);
+    setSelectedDuration(preset.label);
+    setShowCustomDate(false);
   };
 
   const handleNextStep = () => {
@@ -79,6 +113,15 @@ const CreatePortal = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 via-transparent to-foreground/5 pointer-events-none" />
       
       <div className="w-full max-w-md relative z-10">
+        {/* Logo */}
+        <div className="flex justify-center mb-8 animate-fade-in">
+          <img 
+            src={portalLogo} 
+            alt="Portals Logo" 
+            className="w-16 h-16 object-contain opacity-80"
+          />
+        </div>
+
         {/* Step 1: Name */}
         {step === 1 && (
           <div className="animate-fade-in space-y-8">
@@ -117,31 +160,65 @@ const CreatePortal = () => {
           </div>
         )}
 
-        {/* Step 2: Date Selection */}
+        {/* Step 2: Duration Selection */}
         {step === 2 && (
           <div className="animate-fade-in space-y-8">
             <div className="text-center space-y-3">
               <h1 className="text-4xl font-bold text-foreground">When will it unlock?</h1>
-              <p className="text-muted-foreground italic">Choose a date in the future</p>
+              <p className="text-muted-foreground italic">Choose how long until this portal opens</p>
             </div>
             
             <div className="space-y-6">
-              <div className="relative">
-                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-                <Input
-                  type="date"
-                  value={unlockDate}
-                  onChange={(e) => setUnlockDate(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]}
-                  className="text-center text-lg h-14 pl-12 bg-background/50 backdrop-blur-sm border-foreground/20"
-                  autoFocus
-                />
+              <div className="grid grid-cols-2 gap-3">
+                {DURATION_PRESETS.map((preset) => (
+                  <Button
+                    key={preset.label}
+                    variant={selectedDuration === preset.label ? "default" : "outline"}
+                    className={`h-16 text-base transition-all ${
+                      selectedDuration === preset.label
+                        ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                        : ""
+                    }`}
+                    onClick={() => handleDurationSelect(preset)}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{preset.label}</span>
+                    </div>
+                  </Button>
+                ))}
               </div>
+
+              {showCustomDate && (
+                <div className="animate-fade-in">
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+                    <Input
+                      type="date"
+                      value={unlockDate}
+                      onChange={(e) => {
+                        setUnlockDate(e.target.value);
+                        setSelectedDuration("Custom");
+                      }}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="text-center text-lg h-14 pl-12 bg-background/50 backdrop-blur-sm border-foreground/20"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+              )}
+
+              {unlockDate && (
+                <div className="text-center text-sm text-muted-foreground animate-fade-in">
+                  Opens on {format(new Date(unlockDate), "MMMM dd, yyyy")}
+                </div>
+              )}
               
               <Button 
                 onClick={handleNextStep} 
                 className="w-full h-12 text-base"
                 size="lg"
+                disabled={!unlockDate}
               >
                 Continue <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
