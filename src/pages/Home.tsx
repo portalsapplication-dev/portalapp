@@ -14,7 +14,16 @@ const Home = () => {
   const [portals, setPortals] = useState<Portal[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentQuote, setCurrentQuote] = useState(0);
   const navigate = useNavigate();
+
+  const quotes = [
+    "Time reveals everything.",
+    "Every moment is a portal to your future self.",
+    "Memories are the architecture of our identity.",
+    "Your journey is uniquely yours.",
+    "Small steps today, great strides tomorrow.",
+  ];
 
   useEffect(() => {
     // Check auth and migrate data
@@ -84,27 +93,17 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [isAuthenticated, portals, navigate]);
 
-  if (isLoading) {
-    return <LoadingScreen text="Loading your portals..." />;
-  }
-
-  const quotes = [
-    "Time reveals everything.",
-    "Every moment is a portal to your future self.",
-    "Memories are the architecture of our identity.",
-    "Your journey is uniquely yours.",
-    "Small steps today, great strides tomorrow.",
-  ];
-
-  const [currentQuote, setCurrentQuote] = useState(0);
-
   useEffect(() => {
     if (!isAuthenticated || portals.length === 0) return;
     const interval = setInterval(() => {
       setCurrentQuote((prev) => (prev + 1) % quotes.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [isAuthenticated, portals.length]);
+  }, [isAuthenticated, portals.length, quotes.length]);
+
+  if (isLoading) {
+    return <LoadingScreen text="Loading your portals..." />;
+  }
 
   return (
     <Layout>
