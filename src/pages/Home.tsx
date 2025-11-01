@@ -36,10 +36,10 @@ const Home = () => {
           </div>
           <Link to="/create">
             <Button 
-              className="bg-background/50 backdrop-blur-sm border border-foreground/20 hover:bg-foreground/5"
+              className="bg-foreground text-background hover:bg-foreground/90 shadow-lg hover:shadow-xl transition-all h-14 px-8 text-lg font-semibold"
               size="lg"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-6 h-6 mr-2" />
               Create new portal
             </Button>
           </Link>
@@ -49,27 +49,27 @@ const Home = () => {
         <div className="text-center py-20 space-y-4 animate-fade-in">
           <p className="text-muted-foreground text-lg">No portals yet</p>
           <Link to="/create">
-            <Button size="lg">
-              <Plus className="w-5 h-5 mr-2" />
+            <Button 
+              className="bg-foreground text-background hover:bg-foreground/90 shadow-lg hover:shadow-xl transition-all h-14 px-8 text-lg"
+              size="lg"
+            >
+              <Plus className="w-6 h-6 mr-2" />
               Create Your First Portal
             </Button>
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
-          <div className="flex gap-8 min-w-min animate-fade-in">
-            {portals.map((portal, index) => (
-              <div
-                key={portal.id}
-                className="w-64 flex-shrink-0"
-                style={{
-                  animationDelay: `${index * 0.1}s`,
-                }}
-              >
-                <PortalCard portal={portal} />
-              </div>
-            ))}
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 pb-4 animate-fade-in">
+          {portals.map((portal, index) => (
+            <div
+              key={portal.id}
+              style={{
+                animationDelay: `${index * 0.05}s`,
+              }}
+            >
+              <PortalCard portal={portal} />
+            </div>
+          ))}
         </div>
       )}
       </div>

@@ -114,12 +114,15 @@ const CreatePortal = () => {
       
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
-        <div className="flex justify-center mb-8 animate-fade-in">
-          <img 
-            src={portalLogo} 
-            alt="Portals Logo" 
-            className="w-16 h-16 object-contain opacity-80"
-          />
+        <div className="flex justify-center mb-12 animate-fade-in">
+          <div className="relative">
+            <div className="absolute inset-0 bg-foreground/5 blur-3xl rounded-full" />
+            <img 
+              src={portalLogo} 
+              alt="Portals Logo" 
+              className="relative w-32 h-32 object-contain drop-shadow-[0_0_20px_hsl(var(--foreground)/0.3)]"
+            />
+          </div>
         </div>
 
         {/* Step 1: Name */}

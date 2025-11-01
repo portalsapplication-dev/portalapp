@@ -84,6 +84,17 @@ const PortalCard = ({ portal }: PortalCardProps) => {
         
         {/* Portal center */}
         <div className="absolute inset-8 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm overflow-hidden group-hover:scale-105 transition-transform duration-500">
+          {/* Media silhouette inside portal */}
+          {portal.images && portal.images.length > 0 && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-15 blur-[2px]">
+              <img 
+                src={portal.images[0]} 
+                alt="Portal preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          
           {/* Shimmer effect */}
           <div 
             className="absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/5 to-transparent animate-shimmer" 
