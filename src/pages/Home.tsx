@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getPortals } from "@/lib/storage";
 import { Portal } from "@/types/portal";
 import PortalCard from "@/components/PortalCard";
 import Layout from "@/components/Layout";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -27,11 +27,22 @@ const Home = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Your Portals</h1>
-          <p className="text-muted-foreground">
-            Time capsules waiting to be unlocked
-          </p>
+        <div className="text-center space-y-4 mb-8 animate-fade-in">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold text-foreground">Your Portals</h1>
+            <p className="text-muted-foreground italic">
+              "Time reveals everything."
+            </p>
+          </div>
+          <Link to="/create">
+            <Button 
+              className="bg-background/50 backdrop-blur-sm border border-foreground/20 hover:bg-foreground/5"
+              size="lg"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create new portal
+            </Button>
+          </Link>
         </div>
 
       {portals.length === 0 ? (

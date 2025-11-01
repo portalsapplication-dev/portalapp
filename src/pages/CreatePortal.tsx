@@ -1,23 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { savePortal } from "@/lib/storage";
 import { Portal } from "@/types/portal";
-import { Calendar, Image as ImageIcon, Upload } from "lucide-react";
+import { Calendar, ArrowRight, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 const CreatePortal = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [unlockDate, setUnlockDate] = useState("");
-  const [notes, setNotes] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [description, setDescription] = useState("");
+  const [finalNotes, setFinalNotes] = useState("");
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -34,20 +33,30 @@ const CreatePortal = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
-    if (!title.trim() || !unlockDate) {
-      toast.error("Please fill in title and unlock date");
+  const handleNextStep = () => {
+    if (step === 1 && !title.trim()) {
+      toast.error("Please name your portal");
       return;
     }
-
-    const selectedDate = new Date(unlockDate);
-    if (selectedDate <= new Date()) {
-      toast.error("Unlock date must be in the future");
+    if (step === 2 && !unlockDate) {
+      toast.error("Please select an unlock date");
       return;
     }
+    if (step === 2) {
+      const selectedDate = new Date(unlockDate);
+      if (selectedDate <= new Date()) {
+        toast.error("Unlock date must be in the future");
+        return;
+      }
+    }
+    setStep(step + 1);
+  };
 
+  const handleFinish = () => {
     const portal: Portal = {
       id: crypto.randomUUID(),
       title: title.trim(),
@@ -55,7 +64,7 @@ const CreatePortal = () => {
       unlockDate,
       createdAt: new Date().toISOString(),
       images,
-      notes: notes.trim(),
+      notes: finalNotes.trim(),
       isUnlocked: false,
     };
 
@@ -65,115 +74,230 @@ const CreatePortal = () => {
   };
 
   return (
-    <Layout>
-      <div className="max-w-2xl mx-auto animate-fade-in">
-        <div className="mb-8 animate-slide-up">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Create Portal</h1>
-          <p className="text-muted-foreground">
-            Store your memories for the future
-          </p>
-        </div>
-
-        <Card className="p-6 animate-fade-in-scale" style={{ animationDelay: "0.2s" }}>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 via-transparent to-foreground/5 pointer-events-none" />
+      
+      <div className="w-full max-w-md relative z-10">
+        {/* Step 1: Name */}
+        {step === 1 && (
+          <div className="animate-fade-in space-y-8">
+            <div className="text-center space-y-3">
+              <h1 className="text-4xl font-bold text-foreground">Name your portal</h1>
+              <p className="text-muted-foreground italic">Name your moment in time</p>
+            </div>
+            
+            <div className="space-y-6">
               <Input
-                id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Summer memories 2024"
+                placeholder="Summer of 2024..."
+                className="text-center text-xl h-14 bg-background/50 backdrop-blur-sm border-foreground/20"
                 maxLength={100}
-                required
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && handleNextStep()}
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="What makes this moment special?"
-                rows={3}
-                maxLength={500}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="unlockDate" className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Unlock Date *
-              </Label>
-              <Input
-                id="unlockDate"
-                type="date"
-                value={unlockDate}
-                onChange={(e) => setUnlockDate(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="images" className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4" />
-                Images
-              </Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-foreground/50 transition-colors">
-                <input
-                  id="images"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <label htmlFor="images" className="cursor-pointer">
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload images
-                  </p>
-                </label>
-              </div>
-              {images.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mt-4">
-                  {images.map((img, idx) => (
-                    <img
-                      key={idx}
-                      src={img}
-                      alt={`Upload ${idx + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Write a message to your future self..."
-                rows={5}
-                maxLength={2000}
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => navigate("/")} className="flex-1">
+              
+              <Button 
+                onClick={handleNextStep} 
+                className="w-full h-12 text-base"
+                size="lg"
+              >
+                Continue <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate("/")}
+                className="w-full"
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1">
-                Create Portal
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Date Selection */}
+        {step === 2 && (
+          <div className="animate-fade-in space-y-8">
+            <div className="text-center space-y-3">
+              <h1 className="text-4xl font-bold text-foreground">When will it unlock?</h1>
+              <p className="text-muted-foreground italic">Choose a date in the future</p>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="relative">
+                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+                <Input
+                  type="date"
+                  value={unlockDate}
+                  onChange={(e) => setUnlockDate(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                  className="text-center text-lg h-14 pl-12 bg-background/50 backdrop-blur-sm border-foreground/20"
+                  autoFocus
+                />
+              </div>
+              
+              <Button 
+                onClick={handleNextStep} 
+                className="w-full h-12 text-base"
+                size="lg"
+              >
+                Continue <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                onClick={() => setStep(1)}
+                className="w-full"
+              >
+                Back
               </Button>
             </div>
-          </form>
-        </Card>
+          </div>
+        )}
+
+        {/* Step 3: Content */}
+        {step === 3 && (
+          <div className="animate-fade-in space-y-6">
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-bold text-foreground">Fill your portal</h1>
+              <p className="text-muted-foreground">Add photos, videos, and reflections</p>
+            </div>
+            
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Images & Videos</Label>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-foreground/40 transition-colors bg-background/50 backdrop-blur-sm">
+                  <input
+                    id="media"
+                    type="file"
+                    accept="image/*,video/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <label htmlFor="media" className="cursor-pointer">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Tap to upload
+                    </p>
+                  </label>
+                </div>
+                
+                {images.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {images.map((img, idx) => (
+                      <div key={idx} className="relative group">
+                        <img
+                          src={img}
+                          alt={`Upload ${idx + 1}`}
+                          className="w-full h-24 object-cover rounded-lg"
+                        />
+                        <button
+                          onClick={() => removeImage(idx)}
+                          className="absolute top-1 right-1 bg-background/80 backdrop-blur-sm rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Reflections</Label>
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="What makes this moment special? How do you feel right now?"
+                  rows={5}
+                  maxLength={1000}
+                  className="bg-background/50 backdrop-blur-sm border-foreground/20"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-3 pt-4">
+              <Button 
+                onClick={handleNextStep} 
+                className="w-full h-12 text-base"
+                size="lg"
+              >
+                Continue <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                onClick={() => setStep(2)}
+                className="w-full"
+              >
+                Back
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Final Notes (Auto-appears) */}
+        {step === 4 && (
+          <div className="animate-fade-in space-y-8">
+            <div className="text-center space-y-3">
+              <h1 className="text-3xl font-bold text-foreground">One last thing...</h1>
+              <p className="text-muted-foreground italic">
+                Any final notes for your future self before you say goodbye?
+              </p>
+            </div>
+            
+            <div className="space-y-6">
+              <Textarea
+                value={finalNotes}
+                onChange={(e) => setFinalNotes(e.target.value)}
+                placeholder="Dear future me..."
+                rows={8}
+                maxLength={2000}
+                className="bg-background/50 backdrop-blur-sm border-foreground/20 text-base"
+                autoFocus
+              />
+              
+              <Button 
+                onClick={handleFinish} 
+                className="w-full h-12 text-base"
+                size="lg"
+              >
+                Seal Portal
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                onClick={() => setStep(3)}
+                className="w-full"
+              >
+                Back
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
-    </Layout>
+
+      {/* Step indicator */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+        {[1, 2, 3, 4].map((s) => (
+          <div
+            key={s}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              s === step 
+                ? "bg-foreground w-8" 
+                : s < step 
+                ? "bg-foreground/60" 
+                : "bg-foreground/20"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
