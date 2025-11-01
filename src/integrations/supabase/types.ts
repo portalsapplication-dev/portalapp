@@ -14,7 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      portals: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          images: string[] | null
+          is_unlocked: boolean | null
+          notes: string | null
+          title: string
+          unlock_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          images?: string[] | null
+          is_unlocked?: boolean | null
+          notes?: string | null
+          title: string
+          unlock_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          images?: string[] | null
+          is_unlocked?: boolean | null
+          notes?: string | null
+          title?: string
+          unlock_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      skill_nodes: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_nodes_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "skill_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
