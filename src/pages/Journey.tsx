@@ -5,11 +5,13 @@ import { Portal } from "@/types/portal";
 import Layout from "@/components/Layout";
 import LoadingScreen from "@/components/LoadingScreen";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import NumericPad from "@/components/NumericPad";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 
 const Journey = () => {
   const [portals, setPortals] = useState<Portal[]>([]);
@@ -17,6 +19,7 @@ const Journey = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLocked, setIsLocked] = useState(true);
   const [passwordInput, setPasswordInput] = useState("");
+  const [afterImages, setAfterImages] = useState<{[key: string]: string}>({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +43,15 @@ const Journey = () => {
         p.images && p.images.length > 0 && new Date(p.unlockDate) <= new Date()
       );
       setPortals(openedPortals);
+      
+      // Load saved after images
+      const savedAfterImages: {[key: string]: string} = {};
+      openedPortals.forEach(portal => {
+        const saved = localStorage.getItem(`after-image-${portal.id}`);
+        if (saved) savedAfterImages[portal.id] = saved;
+      });
+      setAfterImages(savedAfterImages);
+      
       setIsLoading(false);
     };
 
@@ -52,11 +64,36 @@ const Journey = () => {
     
     if (passwordInput === savedPassword) {
       setIsLocked(false);
+      setPasswordInput("");
       toast.success("Access granted");
     } else {
       toast.error("Incorrect password");
       setPasswordInput("");
     }
+  };
+
+  const handleAfterImageUpload = (portalId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        setAfterImages(prev => ({ ...prev, [portalId]: dataUrl }));
+        localStorage.setItem(`after-image-${portalId}`, dataUrl);
+        toast.success("After image added");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveAfterImage = (portalId: string) => {
+    setAfterImages(prev => {
+      const updated = { ...prev };
+      delete updated[portalId];
+      return updated;
+    });
+    localStorage.removeItem(`after-image-${portalId}`);
+    toast.success("After image removed");
   };
 
   const handlePrevious = () => {
@@ -93,13 +130,11 @@ const Journey = () => {
                 <NumericPad 
                   value={passwordInput}
                   onChange={setPasswordInput}
-                  maxLength={6}
                 />
               </div>
               <Button 
                 type="submit" 
                 className="w-full shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                disabled={passwordInput.length < 4}
               >
                 Unlock Journey
               </Button>
@@ -113,20 +148,7 @@ const Journey = () => {
   if (portals.length === 0) {
     return (
       <Layout>
-        <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4">
-          <div className="text-center space-y-4 animate-fade-in">
-            <div className="w-24 h-24 mx-auto rounded-full border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
-              <span className="text-4xl">🌌</span>
-            </div>
-            <h2 className="text-2xl font-bold text-foreground">Your Journey Awaits</h2>
-            <p className="text-muted-foreground max-w-md">
-              Capture your journey through portals to see your transformation.
-            </p>
-            <Button onClick={() => navigate("/create")} className="mt-4">
-              Create Your First Portal
-            </Button>
-          </div>
-        </div>
+        <div className="min-h-[calc(100vh-8rem)]"></div>
       </Layout>
     );
   }
@@ -144,51 +166,94 @@ const Journey = () => {
             </p>
           </div>
 
-          {/* Main image display */}
-          <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted/20 border border-border shadow-lg">
-            {currentPortal.images && currentPortal.images[0] && (
-              <img
-                src={currentPortal.images[0]}
-                alt={currentPortal.title}
-                className="w-full h-full object-cover"
-              />
-            )}
-            
-            {/* Navigation arrows */}
-            {portals.length > 1 && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handlePrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/95 backdrop-blur-sm"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/95 backdrop-blur-sm"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </Button>
-              </>
-            )}
-          </div>
-
-          {/* Portal info */}
-          <div className="text-center space-y-2 p-6 rounded-lg bg-card border border-border">
-            <h2 className="text-2xl font-semibold text-foreground">{currentPortal.title}</h2>
-            <p className="text-muted-foreground">{currentPortal.description}</p>
-            <p className="text-sm text-muted-foreground">
-              {new Date(currentPortal.unlockDate).toLocaleDateString(undefined, {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
+          {/* Before Section */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-4">Before</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Media attached to the portal before it was opened
             </p>
-          </div>
+            <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted/20 border border-border shadow-lg">
+              {currentPortal.images && currentPortal.images[0] && (
+                <img
+                  src={currentPortal.images[0]}
+                  alt={currentPortal.title}
+                  className="w-full h-full object-cover"
+                />
+              )}
+              
+              {/* Navigation arrows */}
+              {portals.length > 1 && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handlePrevious}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/95 backdrop-blur-sm"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleNext}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/95 backdrop-blur-sm"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Portal info */}
+            <div className="text-center space-y-2 p-4 mt-4">
+              <h3 className="text-lg font-semibold text-foreground">{currentPortal.title}</h3>
+              <p className="text-sm text-muted-foreground">{currentPortal.description}</p>
+              <p className="text-xs text-muted-foreground">
+                {new Date(currentPortal.unlockDate).toLocaleDateString(undefined, {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </p>
+            </div>
+          </Card>
+
+          {/* After Section */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-4">After</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Upload comparison results after the portal has been opened
+            </p>
+            {afterImages[currentPortal.id] ? (
+              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted/20 border-2 border-foreground shadow-lg">
+                <img
+                  src={afterImages[currentPortal.id]}
+                  alt="After"
+                  className="w-full h-full object-cover"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleRemoveAfterImage(currentPortal.id)}
+                  className="absolute top-4 right-4 bg-destructive/90 hover:bg-destructive"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                <Upload className="w-12 h-12 text-muted-foreground mb-3" />
+                <span className="text-sm text-muted-foreground mb-1">Upload "after" image</span>
+                <span className="text-xs text-muted-foreground">for comparison with "before"</span>
+                <Input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/heic,image/webp"
+                  onChange={(e) => handleAfterImageUpload(currentPortal.id, e)}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </Card>
 
           {/* Thumbnail navigation */}
           {portals.length > 1 && (

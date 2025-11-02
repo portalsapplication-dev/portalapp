@@ -85,7 +85,7 @@ const Home = () => {
     if (!isAuthenticated || portals.length === 0) return;
     const interval = setInterval(() => {
       setCurrentQuote(prev => (prev + 1) % quotes.length);
-    }, 5000);
+    }, 8000);
     return () => clearInterval(interval);
   }, [isAuthenticated, portals.length, quotes.length]);
   if (isLoading) {
@@ -103,22 +103,41 @@ const Home = () => {
         }} />)}
       </div>
 
-      {/* Glowing stars with seamless animation */}
+      {/* Glowing stars with seamless looping animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(25)].map((_, i) => <div key={i} className="absolute w-2.5 h-2.5 bg-foreground/30 rounded-full blur-sm animate-[glow-pulse_5s_ease-in-out_infinite]" style={{
-          top: `${Math.random() * 100}%`,
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${Math.random() * 5}s`,
-          animationDuration: `${5 + Math.random() * 3}s`
-        }} />)}
+        {[...Array(25)].map((_, i) => {
+          const duration = 6 + Math.random() * 4;
+          const delay = -(Math.random() * duration);
+          return (
+            <div 
+              key={i} 
+              className="absolute w-2.5 h-2.5 bg-foreground/30 rounded-full blur-sm"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animation: `glow-pulse ${duration}s ease-in-out infinite`,
+                animationDelay: `${delay}s`
+              }} 
+            />
+          );
+        })}
       </div>
 
         <div className="text-center space-y-8 mb-12 animate-fade-in relative z-10">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-foreground">Your Portals</h1>
-            <p className="text-muted-foreground italic transition-all duration-1000 ease-in-out mx-0 py-[13px]">
-              "{quotes[currentQuote]}"
-            </p>
+            <div className="relative h-[50px] flex items-center justify-center">
+              {quotes.map((quote, index) => (
+                <p 
+                  key={index}
+                  className={`text-muted-foreground italic absolute transition-opacity duration-1000 ease-in-out ${
+                    index === currentQuote ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  "{quote}"
+                </p>
+              ))}
+            </div>
           </div>
           <Link to="/create">
             <Button size="lg" className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/20 backdrop-blur-sm shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all h-14 px-8 text-lg font-semibold py-[30px]">

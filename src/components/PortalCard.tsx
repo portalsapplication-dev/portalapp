@@ -167,8 +167,8 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
             {/* Countdown */}
             <div className="flex items-center gap-1 text-xs">
               <Clock className="w-3 h-3 text-muted-foreground" />
-              <span className={`font-medium ${isUnlocked ? "text-foreground animate-pulse" : "text-muted-foreground"}`}>
-                {isUnlocked ? "Ready" : timeLeft}
+              <span className={`font-medium ${isUnlocked ? "text-foreground" : "text-muted-foreground"}`}>
+                {isUnlocked ? "Unlocked" : timeLeft}
               </span>
             </div>
 

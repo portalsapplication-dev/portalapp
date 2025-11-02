@@ -7,9 +7,9 @@ interface NumericPadProps {
   maxLength?: number;
 }
 
-const NumericPad = ({ value, onChange, maxLength = 6 }: NumericPadProps) => {
+const NumericPad = ({ value, onChange, maxLength }: NumericPadProps) => {
   const handleNumberClick = (num: string) => {
-    if (value.length < maxLength) {
+    if (!maxLength || value.length < maxLength) {
       onChange(value + num);
     }
   };
@@ -24,7 +24,7 @@ const NumericPad = ({ value, onChange, maxLength = 6 }: NumericPadProps) => {
     <div className="w-full max-w-xs mx-auto space-y-6">
       {/* Display dots for password */}
       <div className="flex justify-center gap-3 min-h-[40px] items-center">
-        {[...Array(maxLength)].map((_, i) => (
+        {[...Array(maxLength || Math.max(value.length, 6))].map((_, i) => (
           <div
             key={i}
             className={`w-4 h-4 rounded-full border-2 transition-all shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)] ${

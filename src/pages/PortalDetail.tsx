@@ -6,10 +6,10 @@ import { getPortals, deletePortal, updatePortal } from "@/lib/supabaseStorage";
 import { Portal } from "@/types/portal";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Trash2, Lock, Upload } from "lucide-react";
+import { Clock, Trash2, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import NumericPad from "@/components/NumericPad";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +30,9 @@ const PortalDetail = () => {
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
-  const [thenNowImage, setThenNowImage] = useState<string | null>(null);
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
 
   useEffect(() => {
     const loadPortal = async () => {
@@ -100,22 +101,19 @@ const PortalDetail = () => {
     return () => clearInterval(interval);
   }, [portal, isUnlocked]);
 
-  const handleDelete = async () => {
+  const handleDeleteConfirm = async () => {
+    const savedPassword = localStorage.getItem("journeyPassword");
+    
+    if (savedPassword && deletePassword !== savedPassword) {
+      toast.error("Incorrect password");
+      setDeletePassword("");
+      return;
+    }
+    
     if (portal) {
       await deletePortal(portal.id);
       toast.success("Portal deleted");
       navigate("/");
-    }
-  };
-
-  const handleThenNowUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setThenNowImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -174,7 +172,7 @@ const PortalDetail = () => {
               <Button variant="outline" onClick={() => navigate("/")}>
                 Back to Home
               </Button>
-              <AlertDialog>
+              <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="icon">
                     <Trash2 className="w-4 h-4" />
@@ -184,13 +182,22 @@ const PortalDetail = () => {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Portal?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your portal
-                      and all its contents.
+                      {localStorage.getItem("journeyPassword") 
+                        ? "Enter your passcode to confirm deletion."
+                        : "This action cannot be undone."}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
+                  {localStorage.getItem("journeyPassword") && (
+                    <div className="py-4">
+                      <NumericPad 
+                        value={deletePassword}
+                        onChange={setDeletePassword}
+                      />
+                    </div>
+                  )}
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                    <AlertDialogCancel onClick={() => setDeletePassword("")}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -211,7 +218,7 @@ const PortalDetail = () => {
                   </div>
                   <p className="text-muted-foreground">{portal.description}</p>
                 </div>
-                <AlertDialog>
+                <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" size="icon">
                       <Trash2 className="w-4 h-4" />
@@ -221,12 +228,22 @@ const PortalDetail = () => {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Portal?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone.
+                        {localStorage.getItem("journeyPassword") 
+                          ? "Enter your passcode to confirm deletion."
+                          : "This action cannot be undone."}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
+                    {localStorage.getItem("journeyPassword") && (
+                      <div className="py-4">
+                        <NumericPad 
+                          value={deletePassword}
+                          onChange={setDeletePassword}
+                        />
+                      </div>
+                    )}
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                      <AlertDialogCancel onClick={() => setDeletePassword("")}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -258,45 +275,6 @@ const PortalDetail = () => {
               </Card>
             )}
 
-            {portal.images.length > 0 && (
-              <Card className="p-6">
-                <h2 className="text-xl font-semibold text-foreground mb-4">Then vs Now</h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Compare your journey by uploading a current image alongside your memory
-                </p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Then</p>
-                    <img
-                      src={portal.images[0]}
-                      alt="Then"
-                      className="w-full h-64 object-cover rounded-lg border-2 border-border"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Now</p>
-                    {thenNowImage ? (
-                      <img
-                        src={thenNowImage}
-                        alt="Now"
-                        className="w-full h-64 object-cover rounded-lg border-2 border-foreground animate-fade-in"
-                      />
-                    ) : (
-                      <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                        <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                        <span className="text-sm text-muted-foreground">Upload current image</span>
-                        <Input
-                          type="file"
-                          accept="image/png,image/jpeg,image/jpg,image/heic,image/webp"
-                          onChange={handleThenNowUpload}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            )}
 
             {portal.notes && (
               <Card className="p-6 animate-fade-in" style={{ animationDelay: "0.3s" }}>

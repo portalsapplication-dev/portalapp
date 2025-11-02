@@ -17,6 +17,7 @@ const Settings = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [journeyPassword, setJourneyPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [isPasswordSet, setIsPasswordSet] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -34,6 +35,7 @@ const Settings = () => {
 
     // Check if Journey password exists
     const savedPassword = localStorage.getItem("journeyPassword");
+    setIsPasswordSet(!!savedPassword);
     setShowPasswordInput(!!savedPassword);
 
     return () => subscription.unsubscribe();
@@ -69,22 +71,27 @@ const Settings = () => {
   const handleJourneyPasswordToggle = (enabled: boolean) => {
     if (enabled) {
       setShowPasswordInput(true);
+      setIsPasswordSet(false);
     } else {
       localStorage.removeItem("journeyPassword");
       setShowPasswordInput(false);
+      setIsPasswordSet(false);
       setJourneyPassword("");
       sonnerToast.success("Journey password protection disabled");
     }
   };
 
   const handleSaveJourneyPassword = () => {
-    if (journeyPassword.length < 4 || journeyPassword.length > 6) {
-      sonnerToast.error("Passcode must be 4-6 digits");
-      return;
-    }
     localStorage.setItem("journeyPassword", journeyPassword);
     sonnerToast.success("Journey passcode saved");
     setJourneyPassword("");
+    setIsPasswordSet(true);
+  };
+
+  const handleResetPassword = () => {
+    setIsPasswordSet(false);
+    setJourneyPassword("");
+    sonnerToast.info("Enter a new passcode");
   };
 
   return (
@@ -176,20 +183,30 @@ const Settings = () => {
                       onCheckedChange={handleJourneyPasswordToggle}
                     />
                   </div>
-                  {showPasswordInput && (
+                  {showPasswordInput && !isPasswordSet && (
                     <div className="space-y-4 pt-4 animate-fade-in">
-                      <Label className="text-center block">Set Journey Passcode (4-6 digits)</Label>
+                      <Label className="text-center block">Set Journey Passcode</Label>
                       <NumericPad 
                         value={journeyPassword}
                         onChange={setJourneyPassword}
-                        maxLength={6}
                       />
                       <Button 
                         onClick={handleSaveJourneyPassword} 
                         className="w-full shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                        disabled={journeyPassword.length < 4}
                       >
                         Save Passcode
+                      </Button>
+                    </div>
+                  )}
+                  {showPasswordInput && isPasswordSet && (
+                    <div className="pt-4 text-center space-y-2 animate-fade-in">
+                      <p className="text-sm text-muted-foreground">Passcode is set and active</p>
+                      <Button 
+                        onClick={handleResetPassword} 
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Reset Passcode
                       </Button>
                     </div>
                   )}
