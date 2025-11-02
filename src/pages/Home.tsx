@@ -121,7 +121,7 @@ const Home = () => {
             </p>
           </div>
           <Link to="/create">
-            <Button className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/20 backdrop-blur-sm shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all h-14 px-8 text-lg font-semibold" size="lg">
+            <Button size="lg" className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/20 backdrop-blur-sm shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all h-14 px-8 text-lg font-semibold py-[30px]">
               <Plus className="w-6 h-6 mr-2" />
               Create new portal
             </Button>
