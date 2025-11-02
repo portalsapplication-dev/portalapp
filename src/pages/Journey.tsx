@@ -7,9 +7,9 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import NumericPad from "@/components/NumericPad";
 
 const Journey = () => {
   const [portals, setPortals] = useState<Portal[]>([]);
@@ -75,30 +75,32 @@ const Journey = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-          <div className="w-full max-w-md space-y-6 animate-fade-in-scale p-6">
+          <div className="w-full max-w-md space-y-8 animate-fade-in p-6">
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
-                <div className="absolute inset-0 bg-foreground/5 blur-2xl rounded-full animate-glow-pulse" />
-                <Lock className="relative w-16 h-16 text-foreground" />
+                <div className="absolute inset-0 bg-foreground/10 blur-[60px] rounded-full animate-glow-pulse" />
+                <div className="absolute -inset-4 bg-foreground/5 blur-[80px] rounded-full animate-glow-pulse" />
+                <Lock className="relative w-16 h-16 text-foreground drop-shadow-[0_0_20px_hsl(var(--foreground)/0.3)]" />
               </div>
               <h2 className="text-2xl font-bold">Journey Protected</h2>
               <p className="text-muted-foreground text-center">
-                Enter your password to view your journey
+                Enter your passcode to view your journey
               </p>
             </div>
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="journey-password">Password</Label>
-                <Input
-                  id="journey-password"
-                  type="password"
-                  placeholder="Enter your password"
+            <form onSubmit={handlePasswordSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <Label className="text-center block">Passcode</Label>
+                <NumericPad 
                   value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  required
+                  onChange={setPasswordInput}
+                  maxLength={6}
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button 
+                type="submit" 
+                className="w-full shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                disabled={passwordInput.length < 4}
+              >
                 Unlock Journey
               </Button>
             </form>

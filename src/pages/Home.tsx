@@ -108,38 +108,42 @@ const Home = () => {
   return (
     <Layout>
       <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Animated stars background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(50)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-foreground/30 rounded-full animate-float"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${3 + Math.random() * 2}s`,
-              }}
-            />
-          ))}
-          {/* Larger glowing stars */}
-          {[...Array(10)].map((_, i) => (
-            <div
-              key={`glow-${i}`}
-              className="absolute w-2 h-2 bg-foreground/20 rounded-full blur-sm animate-glow-pulse"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-              }}
-            />
-          ))}
-        </div>
+      {/* Animated stars in the background - larger and brighter */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(50)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1.5 h-1.5 bg-foreground/50 rounded-full animate-[twinkle_4s_ease-in-out_infinite]"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 4}s`,
+              animationDuration: `${4 + Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Glowing stars with seamless animation */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(25)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2.5 h-2.5 bg-foreground/30 rounded-full blur-sm animate-[glow-pulse_5s_ease-in-out_infinite]"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${5 + Math.random() * 3}s`,
+            }}
+          />
+        ))}
+      </div>
 
         <div className="text-center space-y-8 mb-12 animate-fade-in relative z-10">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-foreground">Your Portals</h1>
-            <p className="text-muted-foreground italic transition-opacity duration-500">
+            <p className="text-muted-foreground italic transition-all duration-1000 ease-in-out">
               "{quotes[currentQuote]}"
             </p>
           </div>

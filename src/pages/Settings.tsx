@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 import { toast as sonnerToast } from "sonner";
+import NumericPad from "@/components/NumericPad";
 
 const Settings = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -77,12 +78,12 @@ const Settings = () => {
   };
 
   const handleSaveJourneyPassword = () => {
-    if (journeyPassword.length < 4) {
-      sonnerToast.error("Password must be at least 4 characters");
+    if (journeyPassword.length < 4 || journeyPassword.length > 6) {
+      sonnerToast.error("Passcode must be 4-6 digits");
       return;
     }
     localStorage.setItem("journeyPassword", journeyPassword);
-    sonnerToast.success("Journey password saved");
+    sonnerToast.success("Journey passcode saved");
     setJourneyPassword("");
   };
 
@@ -176,21 +177,20 @@ const Settings = () => {
                     />
                   </div>
                   {showPasswordInput && (
-                    <div className="space-y-2 pt-2">
-                      <Label htmlFor="journey-password">Set Journey Password</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="journey-password"
-                          type="password"
-                          placeholder="Enter password (min 4 characters)"
-                          value={journeyPassword}
-                          onChange={(e) => setJourneyPassword(e.target.value)}
-                          minLength={4}
-                        />
-                        <Button onClick={handleSaveJourneyPassword} size="sm">
-                          Save
-                        </Button>
-                      </div>
+                    <div className="space-y-4 pt-4 animate-fade-in">
+                      <Label className="text-center block">Set Journey Passcode (4-6 digits)</Label>
+                      <NumericPad 
+                        value={journeyPassword}
+                        onChange={setJourneyPassword}
+                        maxLength={6}
+                      />
+                      <Button 
+                        onClick={handleSaveJourneyPassword} 
+                        className="w-full shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                        disabled={journeyPassword.length < 4}
+                      >
+                        Save Passcode
+                      </Button>
                     </div>
                   )}
                 </div>

@@ -10,7 +10,11 @@ import { Calendar, ArrowRight, Upload, X, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { addDays, addWeeks, addMonths, addYears, format } from "date-fns";
 import portalLogo from "@/assets/portal-logo.png";
+import logoWhite from "@/assets/logo-white.png";
+import logoBlack from "@/assets/logo-black.png";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "next-themes";
+import { Camera, Video } from "lucide-react";
 
 const DURATION_PRESETS = [
   { label: "1 Day", days: 1 },
@@ -26,6 +30,7 @@ const DURATION_PRESETS = [
 
 const CreatePortal = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
@@ -169,14 +174,14 @@ const CreatePortal = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 via-transparent to-foreground/5 pointer-events-none" />
       
       <div className="w-full max-w-md relative z-10">
-        {/* Logo */}
+        {/* Logo - Larger and theme-reactive */}
         <div className="flex justify-center mb-12 animate-fade-in">
           <div className="relative">
-            <div className="absolute inset-0 bg-foreground/5 blur-3xl rounded-full" />
+            <div className="absolute inset-0 bg-foreground/10 blur-[80px] rounded-full animate-glow-pulse" />
             <img 
-              src={portalLogo} 
+              src={theme === 'dark' ? logoWhite : logoBlack} 
               alt="Portals Logo" 
-              className="relative w-32 h-32 object-contain drop-shadow-[0_0_20px_hsl(var(--foreground)/0.3)]"
+              className="relative w-48 h-48 object-contain drop-shadow-[0_0_30px_hsl(var(--foreground)/0.4)] transition-all duration-300"
             />
           </div>
         </div>
@@ -335,24 +340,83 @@ const CreatePortal = () => {
             </div>
             
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-              {/* Image Upload */}
-              <div className="space-y-2">
+              {/* Image Upload with Multiple Options */}
+              <div className="space-y-3">
                 <Label className="text-sm font-medium">Images & Videos</Label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-foreground/40 transition-colors bg-background/50 backdrop-blur-sm">
-                  <input
-                    id="media"
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/heic,image/webp,video/*"
-                    multiple
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <label htmlFor="media" className="cursor-pointer">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      Tap to upload
-                    </p>
-                  </label>
+                
+                {/* Upload Options */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="relative">
+                    <input
+                      id="media-upload"
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/heic,image/webp,video/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <label htmlFor="media-upload">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-24 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-foreground/10 shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                        asChild
+                      >
+                        <div>
+                          <Upload className="w-6 h-6" />
+                          <span className="text-xs">Upload</span>
+                        </div>
+                      </Button>
+                    </label>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      id="media-camera"
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <label htmlFor="media-camera">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-24 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-foreground/10 shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                        asChild
+                      >
+                        <div>
+                          <Camera className="w-6 h-6" />
+                          <span className="text-xs">Photo</span>
+                        </div>
+                      </Button>
+                    </label>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      id="media-video"
+                      type="file"
+                      accept="video/*"
+                      capture="environment"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <label htmlFor="media-video">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-24 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-foreground/10 shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                        asChild
+                      >
+                        <div>
+                          <Video className="w-6 h-6" />
+                          <span className="text-xs">Video</span>
+                        </div>
+                      </Button>
+                    </label>
+                  </div>
                 </div>
                 
                 {images.length > 0 && (

@@ -118,6 +118,10 @@ export default {
           "50%": { transform: "scale(1.1)", opacity: "0.5", filter: "blur(5px)" },
           "100%": { transform: "scale(1)", opacity: "1", filter: "blur(0px)" },
         },
+        "twinkle": {
+          "0%, 100%": { opacity: "0.3", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.2)" },
+        },
         "swirl": {
           "0%": { transform: "rotate(0deg) scale(0.5)", opacity: "0" },
           "100%": { transform: "rotate(360deg) scale(1)", opacity: "1" },
@@ -138,6 +142,7 @@ export default {
         "zoom-in": "zoom-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
         "portal-open": "portal-open 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
         "swirl": "swirl 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "twinkle": "twinkle 4s ease-in-out infinite",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

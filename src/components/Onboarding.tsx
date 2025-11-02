@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles, Lock, Target, Map, Settings } from "lucide-react";
+import NumericPad from "./NumericPad";
 
 interface OnboardingProps {
   onComplete: () => void;
@@ -31,22 +31,27 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
   const pages = [
     // Page 1: Welcome
-    <div key="welcome" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in-scale">
+    <div key="welcome" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in">
       <div className="relative">
-        {/* Glowing portal animation */}
-        <div className="absolute inset-0 bg-foreground/10 blur-3xl rounded-full animate-portal-pulse" />
-        <div className="relative w-32 h-32 rounded-full border-4 border-foreground/20 flex items-center justify-center">
+        {/* Glowing portal animation with underglow */}
+        <div className="absolute inset-0 bg-foreground/10 blur-[60px] rounded-full animate-portal-pulse" />
+        <div className="absolute -inset-4 bg-foreground/5 blur-[80px] rounded-full animate-glow-pulse" />
+        <div className="relative w-32 h-32 rounded-full border-4 border-foreground/20 flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.2)] dark:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-foreground/20 to-transparent animate-portal-spin" />
           <Sparkles className="absolute w-12 h-12 text-foreground animate-float" />
         </div>
       </div>
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold">Welcome to Portals</h1>
+        <h1 className="text-4xl font-bold drop-shadow-[0_2px_10px_hsl(var(--foreground)/0.2)]">Welcome to Portals</h1>
         <p className="text-muted-foreground text-lg max-w-md">
           Your journey of self-discovery begins here.
         </p>
       </div>
-      <Button onClick={handleNext} size="lg" className="mt-8">
+      <Button 
+        onClick={handleNext} 
+        size="lg" 
+        className="mt-8 shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] transition-all"
+      >
         Continue
       </Button>
     </div>,
@@ -125,71 +130,99 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     </div>,
 
     // Page 4: Privacy Setup
-    <div key="privacy" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in-scale px-6">
+    <div key="privacy" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in px-6">
       <div className="relative">
-        <div className="absolute inset-0 bg-foreground/5 blur-2xl rounded-full animate-glow-pulse" />
-        <Lock className="relative w-20 h-20 text-foreground" />
+        <div className="absolute inset-0 bg-foreground/10 blur-[60px] rounded-full animate-glow-pulse" />
+        <div className="absolute -inset-4 bg-foreground/5 blur-[80px] rounded-full animate-glow-pulse" />
+        <Lock className="relative w-20 h-20 text-foreground drop-shadow-[0_0_20px_hsl(var(--foreground)/0.3)]" />
       </div>
       <div className="text-center space-y-4 max-w-md">
         <h2 className="text-3xl font-bold">Protect Your Journey</h2>
         <p className="text-muted-foreground">
-          Set a password to keep your portals private (optional).
+          Set a 4-6 digit passcode to keep your portals private (optional).
         </p>
       </div>
-      <div className="w-full max-w-sm space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="journey-password">Journey Password</Label>
-          <Input
-            id="journey-password"
-            type="password"
-            placeholder="Enter a password (optional)"
+      <div className="w-full max-w-sm space-y-6">
+        <div className="space-y-4">
+          <Label className="text-center block">Journey Passcode</Label>
+          <NumericPad 
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
+            maxLength={6}
           />
         </div>
-        <p className="text-xs text-muted-foreground">
-          This password will protect your Journey section. You can change it later in Settings.
+        <p className="text-xs text-muted-foreground text-center">
+          This passcode will protect your Journey section. You can change it later in Settings.
         </p>
       </div>
       <div className="flex gap-4">
-        <Button variant="ghost" onClick={handleSkipPassword}>
+        <Button 
+          variant="ghost" 
+          onClick={handleSkipPassword}
+          className="shadow-[0_0_15px_rgba(0,0,0,0.05)] dark:shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+        >
           Skip
         </Button>
-        <Button onClick={handleNext}>
-          {password ? "Set Password" : "Continue"}
+        <Button 
+          onClick={handleNext}
+          disabled={password.length > 0 && password.length < 4}
+          className="shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+        >
+          {password ? "Set Passcode" : "Continue"}
         </Button>
       </div>
     </div>,
 
     // Page 5: Final
-    <div key="final" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in-scale">
+    <div key="final" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in">
       <div className="relative">
-        <div className="absolute inset-0 bg-foreground/10 blur-3xl rounded-full animate-glow-pulse" />
+        <div className="absolute inset-0 bg-foreground/10 blur-[60px] rounded-full animate-glow-pulse" />
+        <div className="absolute -inset-4 bg-foreground/5 blur-[80px] rounded-full animate-glow-pulse" />
         <div className="relative">
-          <Sparkles className="w-24 h-24 text-foreground animate-float" />
+          <Sparkles className="w-24 h-24 text-foreground animate-float drop-shadow-[0_0_25px_hsl(var(--foreground)/0.4)]" />
         </div>
       </div>
       <div className="text-center space-y-4 max-w-md">
-        <h2 className="text-4xl font-bold">You're All Set!</h2>
+        <h2 className="text-4xl font-bold drop-shadow-[0_2px_10px_hsl(var(--foreground)/0.2)]">You're All Set!</h2>
         <p className="text-muted-foreground text-lg">
           You can always change your settings or find help in the Settings menu.
         </p>
       </div>
-      <Button onClick={handleNext} size="lg" className="mt-8">
+      <Button 
+        onClick={handleNext} 
+        size="lg" 
+        className="mt-8 shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] transition-all"
+      >
         Get Started
       </Button>
     </div>,
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4">
-      <div className="w-full h-full max-w-4xl max-h-screen flex flex-col">
+    <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4 overflow-hidden">
+      {/* Background stars for consistency */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(40)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1.5 h-1.5 bg-foreground/40 rounded-full animate-[twinkle_4s_ease-in-out_infinite]"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 4}s`,
+              animationDuration: `${4 + Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="w-full h-full max-w-4xl max-h-screen flex flex-col relative z-10">
         {/* Progress indicators */}
         <div className="flex justify-center gap-2 mb-8">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              className={`h-2 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(0,0,0,0.1)] dark:shadow-[0_0_10px_rgba(255,255,255,0.1)] ${
                 i === currentPage
                   ? "w-8 bg-foreground"
                   : i < currentPage
@@ -200,8 +233,8 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
           ))}
         </div>
         
-        {/* Current page content */}
-        <div className="flex-1 flex items-center justify-center">
+        {/* Current page content with smooth fade transition */}
+        <div className="flex-1 flex items-center justify-center transition-opacity duration-500">
           {pages[currentPage]}
         </div>
       </div>
