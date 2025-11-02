@@ -136,7 +136,7 @@ const Home = () => {
           ))}
         </div>
 
-        <div className="text-center space-y-4 mb-8 animate-fade-in relative z-10">
+        <div className="text-center space-y-8 mb-12 animate-fade-in relative z-10">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-foreground">Your Portals</h1>
             <p className="text-muted-foreground italic transition-opacity duration-500">
@@ -145,7 +145,7 @@ const Home = () => {
           </div>
           <Link to="/create">
             <Button 
-              className="bg-foreground text-background hover:bg-foreground/90 shadow-lg hover:shadow-xl transition-all h-14 px-8 text-lg font-semibold"
+              className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/20 backdrop-blur-sm shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all h-14 px-8 text-lg font-semibold"
               size="lg"
             >
               <Plus className="w-6 h-6 mr-2" />
