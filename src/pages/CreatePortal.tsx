@@ -177,11 +177,11 @@ const CreatePortal = () => {
         {/* Logo - Larger and theme-reactive */}
         <div className="flex justify-center mb-12 animate-fade-in">
           <div className="relative">
-            <div className="absolute inset-0 bg-foreground/10 blur-[80px] rounded-full animate-glow-pulse" />
+            <div className="absolute inset-0 bg-foreground/10 blur-[120px] rounded-full animate-glow-pulse" />
             <img 
               src={theme === 'dark' ? logoWhite : logoBlack} 
               alt="Portals Logo" 
-              className="relative w-48 h-48 object-contain drop-shadow-[0_0_30px_hsl(var(--foreground)/0.4)] transition-all duration-300"
+              className="relative w-64 h-64 object-contain drop-shadow-[0_0_50px_hsl(var(--foreground)/0.5)] transition-all duration-300"
             />
           </div>
         </div>
