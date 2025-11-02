@@ -11,6 +11,7 @@ import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./components/SplashScreen";
+import Onboarding from "./components/Onboarding";
 import SkillTree from "./pages/SkillTree";
 import Journey from "./pages/Journey";
 
@@ -18,6 +19,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     const hasSeenSplash = sessionStorage.getItem("hasSeenSplash");
@@ -26,13 +28,28 @@ const App = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const hasCompletedOnboarding = localStorage.getItem("hasCompletedOnboarding");
+    if (!hasCompletedOnboarding && !showSplash) {
+      setShowOnboarding(true);
+    }
+  }, [showSplash]);
+
   const handleSplashComplete = () => {
     sessionStorage.setItem("hasSeenSplash", "true");
     setShowSplash(false);
   };
 
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
+
   if (showSplash) {
     return <SplashScreen onComplete={handleSplashComplete} />;
+  }
+
+  if (showOnboarding) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
   return (

@@ -5,13 +5,18 @@ import { Portal } from "@/types/portal";
 import Layout from "@/components/Layout";
 import LoadingScreen from "@/components/LoadingScreen";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 const Journey = () => {
   const [portals, setPortals] = useState<Portal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLocked, setIsLocked] = useState(true);
+  const [passwordInput, setPasswordInput] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +27,12 @@ const Journey = () => {
       if (!session) {
         navigate("/auth");
         return;
+      }
+
+      // Check if Journey is password protected
+      const savedPassword = localStorage.getItem("journeyPassword");
+      if (!savedPassword) {
+        setIsLocked(false);
       }
 
       const stored = await getPortals();
@@ -35,6 +46,19 @@ const Journey = () => {
     initAuth();
   }, [navigate]);
 
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const savedPassword = localStorage.getItem("journeyPassword");
+    
+    if (passwordInput === savedPassword) {
+      setIsLocked(false);
+      toast.success("Access granted");
+    } else {
+      toast.error("Incorrect password");
+      setPasswordInput("");
+    }
+  };
+
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : portals.length - 1));
   };
@@ -45,6 +69,43 @@ const Journey = () => {
 
   if (isLoading) {
     return <LoadingScreen text="Loading your journey..." />;
+  }
+
+  if (isLocked) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+          <div className="w-full max-w-md space-y-6 animate-fade-in-scale p-6">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-foreground/5 blur-2xl rounded-full animate-glow-pulse" />
+                <Lock className="relative w-16 h-16 text-foreground" />
+              </div>
+              <h2 className="text-2xl font-bold">Journey Protected</h2>
+              <p className="text-muted-foreground text-center">
+                Enter your password to view your journey
+              </p>
+            </div>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="journey-password">Password</Label>
+                <Input
+                  id="journey-password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Unlock Journey
+              </Button>
+            </form>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   if (portals.length === 0) {

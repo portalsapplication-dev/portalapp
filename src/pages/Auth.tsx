@@ -13,6 +13,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -30,7 +31,19 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (showForgotPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth`,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Check your email",
+          description: "We've sent you a password reset link.",
+        });
+        setShowForgotPassword(false);
+      } else if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -56,7 +69,7 @@ const Auth = () => {
 
         toast({
           title: "Account created!",
-          description: "You've successfully signed up.",
+          description: "Please check your email to confirm your account.",
         });
         navigate("/");
       }
@@ -71,9 +84,20 @@ const Auth = () => {
     }
   };
 
+  const handleSkipAuth = () => {
+    navigate("/");
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+      <Card className="w-full max-w-md relative">
+        <button
+          onClick={handleSkipAuth}
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors z-10"
+          aria-label="Skip authentication"
+        >
+          <span className="text-xl">×</span>
+        </button>
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
             <div className="relative">
@@ -86,10 +110,16 @@ const Auth = () => {
             </div>
           </div>
           <CardTitle className="text-2xl text-center">
-            {isLogin ? "Welcome back" : "Create an account"}
+            {showForgotPassword
+              ? "Reset Password"
+              : isLogin
+              ? "Welcome back"
+              : "Create an account"}
           </CardTitle>
           <CardDescription className="text-center">
-            {isLogin
+            {showForgotPassword
+              ? "Enter your email to receive a reset link"
+              : isLogin
               ? "Sign in to access your portals"
               : "Sign up to save your memories"}
           </CardDescription>
@@ -107,33 +137,61 @@ const Auth = () => {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-            </div>
+            {!showForgotPassword && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+            )}
+            {isLogin && !showForgotPassword && (
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Forgot Password?
+              </button>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
+              {loading
+                ? "Loading..."
+                : showForgotPassword
+                ? "Send Reset Link"
+                : isLogin
+                ? "Sign In"
+                : "Sign Up"}
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
-            </Button>
+            {showForgotPassword ? (
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setShowForgotPassword(false)}
+              >
+                Back to Sign In
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setIsLogin(!isLogin)}
+              >
+                {isLogin
+                  ? "Don't have an account? Sign up"
+                  : "Already have an account? Sign in"}
+              </Button>
+            )}
           </CardFooter>
         </form>
       </Card>

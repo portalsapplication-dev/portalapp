@@ -107,8 +107,36 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-4 mb-8 animate-fade-in">
+      <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Animated stars background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-foreground/30 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+          {/* Larger glowing stars */}
+          {[...Array(10)].map((_, i) => (
+            <div
+              key={`glow-${i}`}
+              className="absolute w-2 h-2 bg-foreground/20 rounded-full blur-sm animate-glow-pulse"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="text-center space-y-4 mb-8 animate-fade-in relative z-10">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-foreground">Your Portals</h1>
             <p className="text-muted-foreground italic transition-opacity duration-500">

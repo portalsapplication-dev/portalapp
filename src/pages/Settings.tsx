@@ -5,13 +5,17 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Moon, Sun, LogOut, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
+import { toast as sonnerToast } from "sonner";
 
 const Settings = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [journeyPassword, setJourneyPassword] = useState("");
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -26,6 +30,10 @@ const Settings = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserEmail(session?.user?.email || null);
     });
+
+    // Check if Journey password exists
+    const savedPassword = localStorage.getItem("journeyPassword");
+    setShowPasswordInput(!!savedPassword);
 
     return () => subscription.unsubscribe();
   }, []);
@@ -55,6 +63,27 @@ const Settings = () => {
 
   const handleLogin = () => {
     navigate("/auth");
+  };
+
+  const handleJourneyPasswordToggle = (enabled: boolean) => {
+    if (enabled) {
+      setShowPasswordInput(true);
+    } else {
+      localStorage.removeItem("journeyPassword");
+      setShowPasswordInput(false);
+      setJourneyPassword("");
+      sonnerToast.success("Journey password protection disabled");
+    }
+  };
+
+  const handleSaveJourneyPassword = () => {
+    if (journeyPassword.length < 4) {
+      sonnerToast.error("Password must be at least 4 characters");
+      return;
+    }
+    localStorage.setItem("journeyPassword", journeyPassword);
+    sonnerToast.success("Journey password saved");
+    setJourneyPassword("");
   };
 
   return (
@@ -116,7 +145,7 @@ const Settings = () => {
                   <div className="space-y-1 flex-1">
                     <Label className="text-base">Cloud Backup</Label>
                     <p className="text-sm text-muted-foreground">
-                      Back up your portals and media to the cloud. Your content stays private unless you choose to back it up.
+                      Back up your portals and media to the cloud
                     </p>
                   </div>
                   <Switch 
@@ -131,8 +160,43 @@ const Settings = () => {
                     }}
                   />
                 </div>
+                
+                <div className="space-y-4 p-4 border border-border rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="journey-protection" className="text-base">Journey Protection</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Require password to view Journey section
+                      </p>
+                    </div>
+                    <Switch
+                      id="journey-protection"
+                      checked={showPasswordInput}
+                      onCheckedChange={handleJourneyPasswordToggle}
+                    />
+                  </div>
+                  {showPasswordInput && (
+                    <div className="space-y-2 pt-2">
+                      <Label htmlFor="journey-password">Set Journey Password</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="journey-password"
+                          type="password"
+                          placeholder="Enter password (min 4 characters)"
+                          value={journeyPassword}
+                          onChange={(e) => setJourneyPassword(e.target.value)}
+                          minLength={4}
+                        />
+                        <Button onClick={handleSaveJourneyPassword} size="sm">
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
                 <p className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
-                  🔒 All portal media is stored locally by default for privacy and faster access. Enable cloud backup to sync across devices.
+                  🔒 Your content stays private unless you choose to back it up. All portal media is stored locally by default for privacy and faster access.
                 </p>
               </div>
             </div>
