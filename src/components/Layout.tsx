@@ -12,7 +12,7 @@ const Layout = ({ children }: LayoutProps) => {
       
       <div className="flex-1 flex flex-col">
         <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-          <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-center">
             <h1 className="text-xl font-bold text-foreground">Portals</h1>
           </div>
         </header>
