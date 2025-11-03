@@ -130,13 +130,48 @@ const Settings = () => {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
+      <div className="max-w-2xl mx-auto relative">
+        {/* Animated stars in the background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1.5 h-1.5 bg-foreground/50 rounded-full animate-[twinkle_4s_ease-in-out_infinite]"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${4 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Glowing stars with seamless looping animation */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(25)].map((_, i) => {
+            const duration = 6 + Math.random() * 4;
+            const delay = -(Math.random() * duration);
+            return (
+              <div
+                key={i}
+                className="absolute w-2.5 h-2.5 bg-foreground/30 rounded-full blur-sm"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  animation: `glow-pulse ${duration}s ease-in-out infinite`,
+                  animationDelay: `${delay}s`,
+                }}
+              />
+            );
+          })}
+        </div>
+        <div className="mb-8 relative z-10">
           <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
           <p className="text-muted-foreground">Customize your experience</p>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 relative z-10">
           <div className="space-y-6">
             {/* Account Section */}
             <div className="pb-6 border-b border-border">

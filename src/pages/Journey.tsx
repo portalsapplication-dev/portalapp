@@ -111,8 +111,44 @@ const Journey = () => {
   if (isLocked) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-          <div className="w-full max-w-md space-y-8 animate-fade-in p-6">
+        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] relative overflow-hidden">
+          {/* Animated stars in the background */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(50)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1.5 h-1.5 bg-foreground/50 rounded-full animate-[twinkle_4s_ease-in-out_infinite]"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 4}s`,
+                  animationDuration: `${4 + Math.random() * 2}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Glowing stars with seamless looping animation */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(25)].map((_, i) => {
+              const duration = 6 + Math.random() * 4;
+              const delay = -(Math.random() * duration);
+              return (
+                <div
+                  key={i}
+                  className="absolute w-2.5 h-2.5 bg-foreground/30 rounded-full blur-sm"
+                  style={{
+                    top: `${Math.random() * 100}%`,
+                    left: `${Math.random() * 100}%`,
+                    animation: `glow-pulse ${duration}s ease-in-out infinite`,
+                    animationDelay: `${delay}s`,
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          <div className="w-full max-w-md space-y-8 animate-fade-in p-6 relative z-10">
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-foreground/10 blur-[60px] rounded-full animate-glow-pulse" />
@@ -148,7 +184,43 @@ const Journey = () => {
   if (portals.length === 0) {
     return (
       <Layout>
-        <div className="min-h-[calc(100vh-8rem)]"></div>
+        <div className="min-h-[calc(100vh-8rem)] relative overflow-hidden">
+          {/* Animated stars in the background */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(50)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1.5 h-1.5 bg-foreground/50 rounded-full animate-[twinkle_4s_ease-in-out_infinite]"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 4}s`,
+                  animationDuration: `${4 + Math.random() * 2}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Glowing stars with seamless looping animation */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(25)].map((_, i) => {
+              const duration = 6 + Math.random() * 4;
+              const delay = -(Math.random() * duration);
+              return (
+                <div
+                  key={i}
+                  className="absolute w-2.5 h-2.5 bg-foreground/30 rounded-full blur-sm"
+                  style={{
+                    top: `${Math.random() * 100}%`,
+                    left: `${Math.random() * 100}%`,
+                    animation: `glow-pulse ${duration}s ease-in-out infinite`,
+                    animationDelay: `${delay}s`,
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
       </Layout>
     );
   }
@@ -157,8 +229,43 @@ const Journey = () => {
 
   return (
     <Layout>
-      <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-4xl space-y-6 animate-fade-in">
+      <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden">
+        {/* Animated stars in the background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1.5 h-1.5 bg-foreground/50 rounded-full animate-[twinkle_4s_ease-in-out_infinite]"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${4 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Glowing stars with seamless looping animation */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(25)].map((_, i) => {
+            const duration = 6 + Math.random() * 4;
+            const delay = -(Math.random() * duration);
+            return (
+              <div
+                key={i}
+                className="absolute w-2.5 h-2.5 bg-foreground/30 rounded-full blur-sm"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  animation: `glow-pulse ${duration}s ease-in-out infinite`,
+                  animationDelay: `${delay}s`,
+                }}
+              />
+            );
+          })}
+        </div>
+        <div className="w-full max-w-4xl space-y-6 animate-fade-in relative z-10">
           <div className="text-center space-y-2 mb-6">
             <h1 className="text-4xl font-bold text-foreground">Your Journey</h1>
             <p className="text-muted-foreground">

@@ -173,15 +173,50 @@ const SkillTree = () => {
 
   return (
     <Layout>
-      <div className="w-full h-[calc(100vh-8rem)] flex flex-col animate-fade-in pb-20">
-        <div className="text-center space-y-2 py-6">
+      <div className="w-full h-[calc(100vh-8rem)] flex flex-col animate-fade-in pb-20 relative overflow-hidden">
+        {/* Animated stars in the background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1.5 h-1.5 bg-foreground/50 rounded-full animate-[twinkle_4s_ease-in-out_infinite]"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${4 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Glowing stars with seamless looping animation */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(25)].map((_, i) => {
+            const duration = 6 + Math.random() * 4;
+            const delay = -(Math.random() * duration);
+            return (
+              <div
+                key={i}
+                className="absolute w-2.5 h-2.5 bg-foreground/30 rounded-full blur-sm"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  animation: `glow-pulse ${duration}s ease-in-out infinite`,
+                  animationDelay: `${delay}s`,
+                }}
+              />
+            );
+          })}
+        </div>
+        <div className="text-center space-y-2 py-6 relative z-10">
           <h1 className="text-4xl font-bold text-foreground">Skill Tree</h1>
           <p className="text-muted-foreground italic">
             "Every branch is growth."
           </p>
         </div>
 
-        <div className="flex gap-2 mx-4 z-10 bg-background/80 backdrop-blur-sm p-4 rounded-lg border border-foreground/10">
+        <div className="flex gap-2 mx-4 z-20 bg-background/80 backdrop-blur-sm p-4 rounded-lg border border-foreground/10">
           <Input
             placeholder={
               selectedParent 
@@ -207,7 +242,7 @@ const SkillTree = () => {
           )}
         </div>
 
-        <div className="flex-1 relative overflow-hidden">
+        <div className="flex-1 relative overflow-hidden z-10">
           {nodes.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-muted-foreground animate-fade-in space-y-4">
