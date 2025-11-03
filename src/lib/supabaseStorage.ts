@@ -1,6 +1,7 @@
 import { Portal } from "@/types/portal";
 import { SkillNode } from "@/types/skillTree";
 import { supabase } from "@/integrations/supabase/client";
+import { portalSchema, skillNodeSchema } from "./validation";
 
 // Portal functions
 export const getPortals = async (): Promise<Portal[]> => {
@@ -13,7 +14,6 @@ export const getPortals = async (): Promise<Portal[]> => {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching portals:", error);
     return [];
   }
 
@@ -33,6 +33,19 @@ export const savePortal = async (portal: Omit<Portal, "id">): Promise<string | n
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // Validate input
+  const validation = portalSchema.safeParse({
+    title: portal.title,
+    description: portal.description,
+    notes: portal.notes || "",
+    unlockDate: portal.unlockDate,
+    images: portal.images || [],
+  });
+
+  if (!validation.success) {
+    throw new Error(validation.error.errors[0].message);
+  }
+
   const { data, error } = await supabase
     .from("portals")
     .insert({
@@ -48,7 +61,6 @@ export const savePortal = async (portal: Omit<Portal, "id">): Promise<string | n
     .single();
 
   if (error) {
-    console.error("Error saving portal:", error);
     return null;
   }
 
@@ -72,10 +84,6 @@ export const updatePortal = async (id: string, updates: Partial<Portal>): Promis
     .update(updateData)
     .eq("id", id)
     .eq("user_id", user.id);
-
-  if (error) {
-    console.error("Error updating portal:", error);
-  }
 };
 
 export const deletePortal = async (id: string): Promise<void> => {
@@ -87,10 +95,6 @@ export const deletePortal = async (id: string): Promise<void> => {
     .delete()
     .eq("id", id)
     .eq("user_id", user.id);
-
-  if (error) {
-    console.error("Error deleting portal:", error);
-  }
 };
 
 // Skill Node functions
@@ -104,7 +108,6 @@ export const getSkillNodes = async (): Promise<SkillNode[]> => {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching skill nodes:", error);
     return [];
   }
 
@@ -140,10 +143,6 @@ export const saveSkillNodes = async (nodes: SkillNode[]): Promise<void> => {
       y: node.y,
     }))
   );
-
-  if (error) {
-    console.error("Error saving skill nodes:", error);
-  }
 };
 
 export const addSkillNode = async (
@@ -151,6 +150,17 @@ export const addSkillNode = async (
 ): Promise<SkillNode | null> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
+
+  // Validate input
+  const validation = skillNodeSchema.safeParse({
+    title: node.title,
+    x: node.x,
+    y: node.y,
+  });
+
+  if (!validation.success) {
+    throw new Error(validation.error.errors[0].message);
+  }
 
   const { data, error } = await supabase
     .from("skill_nodes")
@@ -166,7 +176,6 @@ export const addSkillNode = async (
     .single();
 
   if (error) {
-    console.error("Error adding skill node:", error);
     return null;
   }
 
@@ -200,10 +209,6 @@ export const updateSkillNode = async (
     .update(updateData)
     .eq("id", id)
     .eq("user_id", user.id);
-
-  if (error) {
-    console.error("Error updating skill node:", error);
-  }
 };
 
 export const deleteSkillNode = async (id: string): Promise<void> => {
@@ -216,10 +221,6 @@ export const deleteSkillNode = async (id: string): Promise<void> => {
     .delete()
     .or(`id.eq.${id},parent_id.eq.${id}`)
     .eq("user_id", user.id);
-
-  if (error) {
-    console.error("Error deleting skill node:", error);
-  }
 };
 
 // Migration helper - migrate localStorage data to Supabase
@@ -244,9 +245,10 @@ export const migrateLocalStorageToSupabase = async (): Promise<void> => {
           created_at: portal.createdAt,
         });
       }
+      // Clean up after successful migration
       localStorage.removeItem("portals");
     } catch (error) {
-      console.error("Error migrating portals:", error);
+      // Silent fail - migration errors are not critical
     }
   }
 
@@ -267,9 +269,40 @@ export const migrateLocalStorageToSupabase = async (): Promise<void> => {
           y: node.y,
         });
       }
+      // Clean up after successful migration
       localStorage.removeItem("portals_skill_tree");
     } catch (error) {
-      console.error("Error migrating skill nodes:", error);
+      // Silent fail - migration errors are not critical
     }
   }
+};
+
+// Portal view tracking functions
+export const markPortalAsViewed = async (portalId: string): Promise<void> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("portal_views")
+    .upsert({
+      user_id: user.id,
+      portal_id: portalId,
+      viewed_at: new Date().toISOString(),
+    }, {
+      onConflict: "user_id,portal_id"
+    });
+};
+
+export const getPortalView = async (portalId: string): Promise<boolean> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data } = await supabase
+    .from("portal_views")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("portal_id", portalId)
+    .maybeSingle();
+
+  return !!data;
 };

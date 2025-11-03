@@ -119,7 +119,6 @@ const CreatePortal = () => {
     try {
       setIsCreating(true);
       setSealingProgress(0);
-      console.log("Starting portal creation...");
       
       // Simulate sealing progress
       const progressInterval = setInterval(() => {
@@ -148,9 +147,7 @@ const CreatePortal = () => {
         ...(enablePortalPassword && portalPassword ? { portalPassword } : {}),
       };
 
-      console.log("Portal data:", portal);
       const id = await savePortal(portal);
-      console.log("Portal saved with ID:", id);
       
       clearInterval(progressInterval);
       setSealingProgress(100);
@@ -165,8 +162,8 @@ const CreatePortal = () => {
         toast.error("Failed to create portal. Please try again.");
       }
     } catch (error) {
-      console.error("Error in handleFinish:", error);
-      toast.error("An error occurred while creating the portal.");
+      const errorMessage = error instanceof Error ? error.message : "An error occurred while creating the portal";
+      toast.error(errorMessage);
     } finally {
       setIsCreating(false);
       setSealingProgress(0);

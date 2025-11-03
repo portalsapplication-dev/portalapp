@@ -3,7 +3,7 @@ import { Clock, Lock, Unlock, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { deletePortal } from "@/lib/supabaseStorage";
+import { deletePortal, getPortalView } from "@/lib/supabaseStorage";
 import { toast } from "sonner";
 
 interface PortalCardProps {
@@ -13,9 +13,18 @@ interface PortalCardProps {
 
 const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
   const [timeLeft, setTimeLeft] = useState<string>("");
+  const [hasBeenOpened, setHasBeenOpened] = useState(false);
   const unlockDate = new Date(portal.unlockDate);
   const isUnlocked = new Date() >= unlockDate;
-  const hasBeenOpened = localStorage.getItem(`portal-opened-${portal.id}`) === "true";
+
+  // Load portal view status from database
+  useEffect(() => {
+    const loadViewStatus = async () => {
+      const viewed = await getPortalView(portal.id);
+      setHasBeenOpened(viewed);
+    };
+    loadViewStatus();
+  }, [portal.id]);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -27,7 +36,6 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
         toast.success("Portal deleted");
         onDelete?.();
       } catch (error) {
-        console.error("Failed to delete portal:", error);
         toast.error("Failed to delete portal");
       }
     }

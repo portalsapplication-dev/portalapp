@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import LoadingScreen from "@/components/LoadingScreen";
-import { getPortals, deletePortal, updatePortal } from "@/lib/supabaseStorage";
+import { getPortals, deletePortal, updatePortal, markPortalAsViewed, getPortalView } from "@/lib/supabaseStorage";
 import { Portal } from "@/types/portal";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,12 +62,12 @@ const PortalDetail = () => {
         }
         
         // Check if this portal has been opened before
-        const openedStatus = localStorage.getItem(`portal-opened-${id}`);
-        setHasBeenOpened(openedStatus === "true");
+        const hasViewed = await getPortalView(id);
+        setHasBeenOpened(hasViewed);
         
         // Mark as opened if unlocked and viewing
-        if (unlocked && !openedStatus) {
-          localStorage.setItem(`portal-opened-${id}`, "true");
+        if (unlocked && !hasViewed) {
+          await markPortalAsViewed(id);
           setHasBeenOpened(true);
         }
         

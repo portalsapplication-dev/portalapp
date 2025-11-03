@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      portal_views: {
+        Row: {
+          id: string
+          portal_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          portal_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          portal_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_views_portal_id_fkey"
+            columns: ["portal_id"]
+            isOneToOne: false
+            referencedRelation: "portals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portals: {
         Row: {
           created_at: string
