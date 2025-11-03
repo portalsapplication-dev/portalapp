@@ -50,7 +50,7 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
           <img
             src={logo}
             alt="Portals Logo"
-            className="w-40 h-40 mx-auto animate-float relative z-10"
+            className="w-56 h-56 mx-auto animate-float relative z-10"
           />
           
           {/* Spinning rings */}
