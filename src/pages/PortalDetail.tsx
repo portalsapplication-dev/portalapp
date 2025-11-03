@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import LoadingScreen from "@/components/LoadingScreen";
-import { getPortals, deletePortal, updatePortal, markPortalAsViewed, getPortalView } from "@/lib/supabaseStorage";
+import { getPortals as getSupabasePortals, deletePortal as deleteSupabasePortal, updatePortal, markPortalAsViewed, getPortalView } from "@/lib/supabaseStorage";
+import { getPortals as getLocalPortals, deletePortal as deleteLocalPortal } from "@/lib/storage";
 import { Portal } from "@/types/portal";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,17 +37,15 @@ const PortalDetail = () => {
   const [deletePassword, setDeletePassword] = useState("");
   const [portalPasswordInput, setPortalPasswordInput] = useState("");
   const [isPortalLocked, setIsPortalLocked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const loadPortal = async () => {
       setIsLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
+      setIsAuthenticated(!!session);
 
-      const portals = await getPortals();
+      const portals = session ? await getSupabasePortals() : getLocalPortals();
       const found = portals.find((p) => p.id === id);
       if (found) {
         setPortal(found);
@@ -61,14 +60,24 @@ const PortalDetail = () => {
           }
         }
         
-        // Check if this portal has been opened before
-        const hasViewed = await getPortalView(id);
-        setHasBeenOpened(hasViewed);
-        
-        // Mark as opened if unlocked and viewing
-        if (unlocked && !hasViewed) {
-          await markPortalAsViewed(id);
-          setHasBeenOpened(true);
+        // Check if this portal has been opened before (only for authenticated users)
+        if (session) {
+          const hasViewed = await getPortalView(id);
+          setHasBeenOpened(hasViewed);
+          
+          // Mark as opened if unlocked and viewing
+          if (unlocked && !hasViewed) {
+            await markPortalAsViewed(id);
+            setHasBeenOpened(true);
+          }
+        } else {
+          // For local storage, check sessionStorage
+          const hasViewed = sessionStorage.getItem(`viewed-${id}`);
+          setHasBeenOpened(!!hasViewed);
+          if (unlocked && !hasViewed) {
+            sessionStorage.setItem(`viewed-${id}`, "true");
+            setHasBeenOpened(true);
+          }
         }
         
         if (unlocked && !sessionStorage.getItem(`unlocked-${id}`)) {
@@ -135,7 +144,11 @@ const PortalDetail = () => {
     }
     
     if (portal) {
-      await deletePortal(portal.id);
+      if (isAuthenticated) {
+        await deleteSupabasePortal(portal.id);
+      } else {
+        deleteLocalPortal(portal.id);
+      }
       toast.success("Portal deleted");
       navigate("/");
     }

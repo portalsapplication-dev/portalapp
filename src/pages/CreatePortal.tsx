@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { savePortal } from "@/lib/supabaseStorage";
+import { savePortal as savePortalSupabase } from "@/lib/supabaseStorage";
+import { savePortal as savePortalLocal } from "@/lib/storage";
 import { Portal } from "@/types/portal";
 import { Calendar, ArrowRight, Upload, X, Clock } from "lucide-react";
 import { toast } from "sonner";
@@ -46,16 +47,14 @@ const CreatePortal = () => {
   const [unlockTime, setUnlockTime] = useState("00:00");
   const [enablePortalPassword, setEnablePortalPassword] = useState(false);
   const [portalPassword, setPortalPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        toast.error("Please sign in to create a portal");
-        navigate("/auth");
-      }
+      setIsAuthenticated(!!session);
     });
-  }, [navigate]);
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -147,7 +146,18 @@ const CreatePortal = () => {
         ...(enablePortalPassword && portalPassword ? { portalPassword } : {}),
       };
 
-      const id = await savePortal(portal);
+      let success = false;
+      if (isAuthenticated) {
+        const id = await savePortalSupabase(portal);
+        success = !!id;
+      } else {
+        const portalWithId = {
+          ...portal,
+          id: `portal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        };
+        savePortalLocal(portalWithId);
+        success = true;
+      }
       
       clearInterval(progressInterval);
       setSealingProgress(100);
@@ -155,7 +165,7 @@ const CreatePortal = () => {
       // Brief pause to show 100%
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      if (id) {
+      if (success) {
         toast.success("Portal sealed successfully! 🌟");
         navigate("/");
       } else {
