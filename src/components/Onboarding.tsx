@@ -84,82 +84,111 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
     </div>,
 
     // Page 3: Portal States & Reactions
-    <div key="portal-states" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in-scale px-6">
-      <h2 className="text-3xl font-bold">How Portals React</h2>
-      <p className="text-muted-foreground text-center max-w-lg">
-        Portals change their appearance based on how close they are to unlocking
-      </p>
+    <div key="portal-states" className="flex flex-col items-center justify-center h-full space-y-6 animate-fade-in-scale px-6 overflow-y-auto max-h-screen py-8">
+      <div className="text-center space-y-2">
+        <h2 className="text-3xl font-bold">How Portals React</h2>
+        <p className="text-muted-foreground max-w-lg">
+          Watch how portals come alive as they approach their unlock time
+        </p>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full">
         {/* Far from Opening - Static */}
-        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border border-border">
-          <div className="relative w-24 h-24">
-            {/* Static portal */}
+        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border border-border hover:border-foreground/30 transition-all">
+          <div className="relative w-28 h-28">
+            {/* Static portal - no animation */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/8 via-foreground/4 to-transparent blur-3xl" />
             <div className="absolute inset-0 rounded-full border border-foreground/30 shadow-[0_0_15px_hsl(var(--foreground)/0.15)]" style={{ borderWidth: '2px' }} />
             <div className="absolute inset-3 rounded-full border border-dashed border-foreground/20" style={{ borderWidth: '1px' }} />
             <div className="absolute inset-8 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm flex items-center justify-center">
-              <Lock className="w-6 h-6 text-muted-foreground" />
+              <Lock className="w-7 h-7 text-muted-foreground" />
             </div>
           </div>
           <div className="text-center space-y-2">
-            <h3 className="font-semibold">Far from Opening</h3>
-            <p className="text-xs text-muted-foreground">Static and calm - more than 24 hours away</p>
-            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              <span>7d 12h</span>
+            <h3 className="font-semibold text-lg">Distant</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong>Static and peaceful</strong> — portals remain calm when they're more than 24 hours away
+            </p>
+            <div className="pt-2 space-y-1">
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Clock className="w-4 h-4" />
+                <span className="font-mono">7d 12h 45m</span>
+              </div>
+              <div className="text-xs text-muted-foreground/70">
+                No animations
+              </div>
             </div>
           </div>
         </div>
 
         {/* Close to Opening - Pulsing */}
-        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border border-border">
-          <div className="relative w-24 h-24">
-            {/* Pulsing portal */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/12 via-foreground/6 to-transparent animate-glow-pulse blur-3xl" />
-            <div className="absolute inset-0 rounded-full border border-foreground/50 shadow-[0_0_20px_hsl(var(--foreground)/0.3)] animate-glow-pulse" style={{ borderWidth: '2px' }} />
-            <div className="absolute inset-3 rounded-full border border-dashed border-foreground/20 animate-portal-spin" style={{ borderWidth: '1px' }} />
+        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border-2 border-foreground/40 hover:border-foreground/60 transition-all shadow-[0_0_20px_hsl(var(--foreground)/0.1)]">
+          <div className="relative w-28 h-28">
+            {/* Pulsing portal with multiple animations */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/15 via-foreground/8 to-transparent animate-glow-pulse blur-3xl" />
+            <div className="absolute inset-0 rounded-full border-2 border-foreground/60 shadow-[0_0_25px_hsl(var(--foreground)/0.4)] animate-glow-pulse" />
+            <div className="absolute inset-3 rounded-full border border-dashed border-foreground/30 animate-portal-spin" />
             <div className="absolute inset-8 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm flex items-center justify-center">
-              <Lock className="w-6 h-6 text-foreground animate-float" />
+              <Lock className="w-7 h-7 text-foreground animate-float" />
             </div>
           </div>
           <div className="text-center space-y-2">
-            <h3 className="font-semibold">Almost Ready</h3>
-            <p className="text-xs text-muted-foreground">Pulsing and glowing - less than 24 hours away</p>
-            <div className="flex items-center justify-center gap-1 text-xs text-foreground">
-              <Clock className="w-3 h-3 animate-pulse" />
-              <span>8h 32m</span>
+            <h3 className="font-semibold text-lg">Almost Ready</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong>Pulsing and glowing</strong> — portals start flashing when less than 24 hours remain
+            </p>
+            <div className="pt-2 space-y-1">
+              <div className="flex items-center justify-center gap-2 text-sm text-foreground">
+                <Clock className="w-4 h-4 animate-pulse" />
+                <span className="font-mono animate-pulse">8h 32m 15s</span>
+              </div>
+              <div className="text-xs text-foreground/70">
+                Glowing + spinning rings
+              </div>
             </div>
           </div>
         </div>
 
         {/* Opened */}
-        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border border-border">
-          <div className="relative w-24 h-24">
-            {/* Badge */}
-            <div className="absolute -top-2 -left-2 z-10 bg-foreground text-background text-xs font-semibold px-2 py-1 rounded-full shadow-lg">
-              Opened
+        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border-2 border-foreground/50 hover:border-foreground/70 transition-all shadow-[0_0_25px_hsl(var(--foreground)/0.15)]">
+          <div className="relative w-28 h-28">
+            {/* Opened badge */}
+            <div className="absolute -top-3 -left-3 z-10 bg-foreground text-background text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-fade-in-scale">
+              OPENED
             </div>
-            {/* Opened portal */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/20 via-foreground/10 to-transparent blur-3xl" />
-            <div className="absolute inset-0 rounded-full border-foreground/50 shadow-[0_0_20px_hsl(var(--foreground)/0.25)]" style={{ borderWidth: '3px' }} />
-            <div className="absolute inset-3 rounded-full border border-dashed border-foreground/30" style={{ borderWidth: '1px' }} />
+            {/* Opened portal - static but brighter */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/25 via-foreground/15 to-transparent blur-3xl" />
+            <div className="absolute inset-0 rounded-full border-[3px] border-foreground/60 shadow-[0_0_25px_hsl(var(--foreground)/0.3)]" />
+            <div className="absolute inset-3 rounded-full border border-dashed border-foreground/40" />
             <div className="absolute inset-8 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm flex items-center justify-center">
-              <Unlock className="w-6 h-6 text-foreground" />
+              <Unlock className="w-7 h-7 text-foreground" />
             </div>
           </div>
           <div className="text-center space-y-2">
-            <h3 className="font-semibold">Opened</h3>
-            <p className="text-xs text-muted-foreground">Static with "Opened" badge - ready to view</p>
-            <div className="flex items-center justify-center gap-1 text-xs text-foreground">
-              <Clock className="w-3 h-3" />
-              <span>Unlocked</span>
+            <h3 className="font-semibold text-lg">Opened</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong>Marked with badge</strong> — opened portals display an "OPENED" tag and are ready to view
+            </p>
+            <div className="pt-2 space-y-1">
+              <div className="flex items-center justify-center gap-2 text-sm text-foreground">
+                <Clock className="w-4 h-4" />
+                <span className="font-mono">Unlocked</span>
+              </div>
+              <div className="text-xs text-foreground/70">
+                No animations
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <Button onClick={handleNext} size="lg">
+      <div className="max-w-2xl text-center space-y-3 pt-4">
+        <p className="text-sm text-muted-foreground">
+          💡 <strong>Pro tip:</strong> The closer a portal gets to unlocking, the more it comes alive with pulsing lights and spinning animations — building anticipation for the moment you can finally open it!
+        </p>
+      </div>
+
+      <Button onClick={handleNext} size="lg" className="mt-4">
         Continue
       </Button>
     </div>,
