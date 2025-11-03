@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Lock, Target, Map, Settings } from "lucide-react";
+import { Sparkles, Lock, Target, Map, Settings, Clock, Unlock } from "lucide-react";
 import NumericPad from "./NumericPad";
 
 interface OnboardingProps {
@@ -13,7 +13,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
   const [password, setPassword] = useState("");
 
   const handleNext = () => {
-    if (currentPage < 4) {
+    if (currentPage < 5) {
       setCurrentPage(currentPage + 1);
     } else {
       // Save onboarding completion and optional password
@@ -26,7 +26,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   const handleSkipPassword = () => {
-    setCurrentPage(4);
+    setCurrentPage(5);
   };
 
   const pages = [
@@ -83,7 +83,88 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
       </Button>
     </div>,
 
-    // Page 3: Features Overview
+    // Page 3: Portal States & Reactions
+    <div key="portal-states" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in-scale px-6">
+      <h2 className="text-3xl font-bold">How Portals React</h2>
+      <p className="text-muted-foreground text-center max-w-lg">
+        Portals change their appearance based on how close they are to unlocking
+      </p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl w-full">
+        {/* Far from Opening - Static */}
+        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border border-border">
+          <div className="relative w-24 h-24">
+            {/* Static portal */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/8 via-foreground/4 to-transparent blur-3xl" />
+            <div className="absolute inset-0 rounded-full border border-foreground/30 shadow-[0_0_15px_hsl(var(--foreground)/0.15)]" style={{ borderWidth: '2px' }} />
+            <div className="absolute inset-3 rounded-full border border-dashed border-foreground/20" style={{ borderWidth: '1px' }} />
+            <div className="absolute inset-8 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm flex items-center justify-center">
+              <Lock className="w-6 h-6 text-muted-foreground" />
+            </div>
+          </div>
+          <div className="text-center space-y-2">
+            <h3 className="font-semibold">Far from Opening</h3>
+            <p className="text-xs text-muted-foreground">Static and calm - more than 24 hours away</p>
+            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              <span>7d 12h</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Close to Opening - Pulsing */}
+        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border border-border">
+          <div className="relative w-24 h-24">
+            {/* Pulsing portal */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/12 via-foreground/6 to-transparent animate-glow-pulse blur-3xl" />
+            <div className="absolute inset-0 rounded-full border border-foreground/50 shadow-[0_0_20px_hsl(var(--foreground)/0.3)] animate-glow-pulse" style={{ borderWidth: '2px' }} />
+            <div className="absolute inset-3 rounded-full border border-dashed border-foreground/20 animate-portal-spin" style={{ borderWidth: '1px' }} />
+            <div className="absolute inset-8 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm flex items-center justify-center">
+              <Lock className="w-6 h-6 text-foreground animate-float" />
+            </div>
+          </div>
+          <div className="text-center space-y-2">
+            <h3 className="font-semibold">Almost Ready</h3>
+            <p className="text-xs text-muted-foreground">Pulsing and glowing - less than 24 hours away</p>
+            <div className="flex items-center justify-center gap-1 text-xs text-foreground">
+              <Clock className="w-3 h-3 animate-pulse" />
+              <span>8h 32m</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Opened */}
+        <div className="flex flex-col items-center space-y-4 p-6 rounded-lg bg-card border border-border">
+          <div className="relative w-24 h-24">
+            {/* Badge */}
+            <div className="absolute -top-2 -left-2 z-10 bg-foreground text-background text-xs font-semibold px-2 py-1 rounded-full shadow-lg">
+              Opened
+            </div>
+            {/* Opened portal */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-foreground/20 via-foreground/10 to-transparent blur-3xl" />
+            <div className="absolute inset-0 rounded-full border-foreground/50 shadow-[0_0_20px_hsl(var(--foreground)/0.25)]" style={{ borderWidth: '3px' }} />
+            <div className="absolute inset-3 rounded-full border border-dashed border-foreground/30" style={{ borderWidth: '1px' }} />
+            <div className="absolute inset-8 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm flex items-center justify-center">
+              <Unlock className="w-6 h-6 text-foreground" />
+            </div>
+          </div>
+          <div className="text-center space-y-2">
+            <h3 className="font-semibold">Opened</h3>
+            <p className="text-xs text-muted-foreground">Static with "Opened" badge - ready to view</p>
+            <div className="flex items-center justify-center gap-1 text-xs text-foreground">
+              <Clock className="w-3 h-3" />
+              <span>Unlocked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Button onClick={handleNext} size="lg">
+        Continue
+      </Button>
+    </div>,
+
+    // Page 4: Features Overview
     <div key="features" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in-scale px-6">
       <h2 className="text-3xl font-bold">App Features</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
@@ -129,7 +210,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
       </Button>
     </div>,
 
-    // Page 4: Privacy Setup
+    // Page 5: Privacy Setup
     <div key="privacy" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in px-6">
       <div className="relative">
         <div className="absolute inset-0 bg-foreground/10 blur-[60px] rounded-full animate-glow-pulse" />
@@ -173,7 +254,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
       </div>
     </div>,
 
-    // Page 5: Final
+    // Page 6: Final
     <div key="final" className="flex flex-col items-center justify-center h-full space-y-8 animate-fade-in">
       <div className="relative">
         <div className="absolute inset-0 bg-foreground/10 blur-[60px] rounded-full animate-glow-pulse" />
@@ -219,7 +300,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
       <div className="w-full h-full max-w-4xl max-h-screen flex flex-col relative z-10">
         {/* Progress indicators */}
         <div className="flex justify-center gap-2 mb-8">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <div
               key={i}
               className={`h-2 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(0,0,0,0.1)] dark:shadow-[0_0_10px_rgba(255,255,255,0.1)] ${
