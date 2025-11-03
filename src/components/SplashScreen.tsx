@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import portalLogo from "@/assets/portal-logo.png";
+import { useTheme } from "next-themes";
+import logoWhite from "@/assets/logo-white.png";
+import logoBlack from "@/assets/logo-black.png";
 import { Button } from "@/components/ui/button";
 
 interface SplashScreenProps {
@@ -8,6 +10,10 @@ interface SplashScreenProps {
 
 const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const [showButton, setShowButton] = useState(false);
+  const { theme, systemTheme } = useTheme();
+  
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const logo = currentTheme === "dark" ? logoWhite : logoBlack;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -42,7 +48,7 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
           
           {/* Portal logo */}
           <img
-            src={portalLogo}
+            src={logo}
             alt="Portals Logo"
             className="w-40 h-40 mx-auto animate-float relative z-10"
           />
