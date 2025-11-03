@@ -70,26 +70,26 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
   const isNearUnlock = !isUnlocked && (unlockDate.getTime() - new Date().getTime()) < 24 * 60 * 60 * 1000;
 
   return (
-    <div className="relative p-8">
+    <div className="relative p-4">
       {/* Delete button - only show on hover */}
       <Button
         variant="ghost"
         size="icon"
         onClick={handleDelete}
-        className="absolute top-6 right-6 z-10 w-8 h-8 rounded-full bg-background border border-border shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+        className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-background border border-border shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
       >
-        <Trash2 className="w-4 h-4" />
+        <Trash2 className="w-3 h-3" />
       </Button>
 
       {/* Opened badge */}
       {isUnlocked && hasBeenOpened && (
-        <div className="absolute top-6 left-6 z-10 bg-foreground text-background text-xs font-semibold px-2 py-1 rounded-full shadow-lg animate-fade-in">
+        <div className="absolute top-2 left-2 z-10 bg-foreground text-background text-[10px] font-semibold px-1.5 py-0.5 rounded-full shadow-lg animate-fade-in">
           Opened
         </div>
       )}
 
       <Link to={`/portal/${portal.id}`} className="block group">
-        <div className="relative w-48 h-48 mx-auto">
+        <div className="relative w-36 h-36 mx-auto">
           {/* Outer glow - CSS only, no images */}
           <div 
             className={`absolute -inset-8 rounded-full transition-all duration-700 ${
@@ -119,14 +119,14 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
           
           {/* Inner spinning ring */}
           <div 
-            className={`absolute inset-2 rounded-full border border-dashed transition-opacity duration-500 ${
+            className={`absolute inset-1.5 rounded-full border border-dashed transition-opacity duration-500 ${
               isUnlocked ? "border-foreground/30" : "border-foreground/20"
             } animate-portal-spin`} 
             style={{ animationDuration: '40s', borderWidth: '1px' }} 
           />
           
           {/* Portal center */}
-          <div className="absolute inset-6 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm overflow-hidden group-hover:scale-105 transition-transform duration-500">
+          <div className="absolute inset-5 rounded-full bg-gradient-to-br from-background/90 via-muted/60 to-background/90 backdrop-blur-sm overflow-hidden group-hover:scale-105 transition-transform duration-500">
             {/* Media silhouette inside portal */}
             {portal.images && portal.images.length > 0 && (
               <div className="absolute inset-0 flex items-center justify-center opacity-15 blur-[2px]">
@@ -145,9 +145,9 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
             />
             
             {/* Content */}
-            <div className="relative h-full flex flex-col items-center justify-center p-2 text-center">
+            <div className="relative h-full flex flex-col items-center justify-center p-1.5 text-center">
             {/* Lock/Unlock icon */}
-            <div className={`mb-2 p-2 rounded-full transition-all duration-300 ${
+            <div className={`mb-1.5 p-1.5 rounded-full transition-all duration-300 ${
               isUnlocked 
                 ? hasBeenOpened
                   ? "bg-foreground/15"
@@ -155,20 +155,20 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
                 : "bg-muted/50"
             }`}>
               {isUnlocked ? (
-                <Unlock className="w-6 h-6 text-foreground" />
+                <Unlock className="w-5 h-5 text-foreground" />
               ) : (
-                <Lock className="w-6 h-6 text-muted-foreground" />
+                <Lock className="w-5 h-5 text-muted-foreground" />
               )}
             </div>
 
             {/* Title */}
-            <h3 className="text-base font-semibold text-foreground mb-1.5 line-clamp-2 group-hover:text-foreground/80 transition-colors">
+            <h3 className="text-sm font-semibold text-foreground mb-1 line-clamp-2 group-hover:text-foreground/80 transition-colors">
               {portal.title}
             </h3>
 
             {/* Countdown */}
-            <div className="flex items-center gap-1 text-xs">
-              <Clock className="w-3 h-3 text-muted-foreground" />
+            <div className="flex items-center gap-0.5 text-[10px]">
+              <Clock className="w-2.5 h-2.5 text-muted-foreground" />
               <span className={`font-medium ${isUnlocked ? "text-foreground" : "text-muted-foreground"}`}>
                 {isUnlocked ? "Unlocked" : timeLeft}
               </span>
@@ -176,7 +176,7 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
 
             {/* Progress indicator for locked portals */}
             {!isUnlocked && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-muted/50 rounded-full overflow-hidden">
+              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-muted/50 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-foreground/60 transition-all duration-1000 rounded-full"
                   style={{
@@ -201,7 +201,7 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
       </Link>
       
       {/* Unlock date below portal */}
-      <div className="text-center mt-4 text-sm text-muted-foreground">
+      <div className="text-center mt-2 text-xs text-muted-foreground">
         {new Date(portal.unlockDate).toLocaleDateString(undefined, { 
           month: 'short', 
           day: 'numeric',
