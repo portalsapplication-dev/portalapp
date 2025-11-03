@@ -10,6 +10,7 @@ import { Clock, Trash2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import NumericPad from "@/components/NumericPad";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,8 @@ const PortalDetail = () => {
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
+  const [portalPasswordInput, setPortalPasswordInput] = useState("");
+  const [isPortalLocked, setIsPortalLocked] = useState(false);
 
   useEffect(() => {
     const loadPortal = async () => {
@@ -49,6 +52,14 @@ const PortalDetail = () => {
         setPortal(found);
         const unlocked = new Date() >= new Date(found.unlockDate);
         setIsUnlocked(unlocked);
+        
+        // Check if portal has a password
+        if (found.portalPassword) {
+          const portalUnlocked = sessionStorage.getItem(`portal-password-${id}`);
+          if (!portalUnlocked) {
+            setIsPortalLocked(true);
+          }
+        }
         
         // Check if this portal has been opened before
         const openedStatus = localStorage.getItem(`portal-opened-${id}`);
@@ -101,6 +112,19 @@ const PortalDetail = () => {
     return () => clearInterval(interval);
   }, [portal, isUnlocked]);
 
+  const handlePortalPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (portal?.portalPassword && portalPasswordInput === portal.portalPassword) {
+      setIsPortalLocked(false);
+      sessionStorage.setItem(`portal-password-${id}`, "true");
+      setPortalPasswordInput("");
+      toast.success("Portal unlocked");
+    } else {
+      toast.error("Incorrect passcode");
+      setPortalPasswordInput("");
+    }
+  };
+
   const handleDeleteConfirm = async () => {
     const savedPassword = localStorage.getItem("journeyPassword");
     
@@ -126,6 +150,53 @@ const PortalDetail = () => {
       <Layout>
         <div className="text-center py-20">
           <p className="text-muted-foreground">Portal not found</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show portal password screen if portal is unlocked but has password
+  if (isUnlocked && isPortalLocked && portal?.portalPassword) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+          <div className="w-full max-w-md space-y-8 animate-fade-in p-6">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-foreground/10 blur-[60px] rounded-full animate-glow-pulse" />
+                <Lock className="relative w-16 h-16 text-foreground drop-shadow-[0_0_20px_hsl(var(--foreground)/0.3)]" />
+              </div>
+              <h2 className="text-2xl font-bold">Portal Protected</h2>
+              <p className="text-muted-foreground text-center">
+                This portal requires a passcode
+              </p>
+            </div>
+            <form onSubmit={handlePortalPasswordSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <Label className="text-center block">Passcode</Label>
+                <NumericPad 
+                  value={portalPasswordInput}
+                  onChange={setPortalPasswordInput}
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                  className="flex-1"
+                >
+                  Back
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="flex-1"
+                >
+                  Unlock
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       </Layout>
     );

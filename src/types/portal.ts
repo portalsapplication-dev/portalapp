@@ -7,4 +7,5 @@ export interface Portal {
   images: string[];
   notes: string;
   isUnlocked: boolean;
+  portalPassword?: string;
 }

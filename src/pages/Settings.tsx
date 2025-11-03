@@ -18,6 +18,10 @@ const Settings = () => {
   const [journeyPassword, setJourneyPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(false);
+  const [verificationStep, setVerificationStep] = useState(false);
+  const [currentPasswordInput, setCurrentPasswordInput] = useState("");
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [showEmailRecovery, setShowEmailRecovery] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -89,9 +93,39 @@ const Settings = () => {
   };
 
   const handleResetPassword = () => {
-    setIsPasswordSet(false);
-    setJourneyPassword("");
-    sonnerToast.info("Enter a new passcode");
+    setVerificationStep(true);
+    setCurrentPasswordInput("");
+    sonnerToast.info("Verify your current passcode");
+  };
+
+  const handleVerifyCurrentPassword = () => {
+    const savedPassword = localStorage.getItem("journeyPassword");
+    if (currentPasswordInput === savedPassword) {
+      setIsPasswordSet(false);
+      setJourneyPassword("");
+      setVerificationStep(false);
+      setCurrentPasswordInput("");
+      sonnerToast.success("Verified! Enter a new passcode");
+    } else {
+      sonnerToast.error("Incorrect passcode");
+      setCurrentPasswordInput("");
+    }
+  };
+
+  const handleEmailRecovery = () => {
+    const savedPassword = localStorage.getItem("journeyPassword");
+    if (recoveryEmail && savedPassword) {
+      // Store email-password association
+      const emailPasswords = JSON.parse(localStorage.getItem("emailPasswords") || "{}");
+      emailPasswords[recoveryEmail] = savedPassword;
+      localStorage.setItem("emailPasswords", JSON.stringify(emailPasswords));
+      
+      // Simulate email (in production, this would be a real email)
+      sonnerToast.success(`Recovery email sent to ${recoveryEmail}`);
+      sonnerToast.info(`Your passcode is: ${savedPassword}`);
+      setShowEmailRecovery(false);
+      setRecoveryEmail("");
+    }
   };
 
   return (
@@ -198,7 +232,7 @@ const Settings = () => {
                       </Button>
                     </div>
                   )}
-                  {showPasswordInput && isPasswordSet && (
+                  {showPasswordInput && isPasswordSet && !verificationStep && (
                     <div className="pt-4 text-center space-y-2 animate-fade-in">
                       <p className="text-sm text-muted-foreground">Passcode is set and active</p>
                       <Button 
@@ -208,6 +242,74 @@ const Settings = () => {
                       >
                         Reset Passcode
                       </Button>
+                      <Button 
+                        onClick={() => setShowEmailRecovery(true)} 
+                        variant="ghost"
+                        className="w-full text-xs"
+                      >
+                        Forgot passcode?
+                      </Button>
+                    </div>
+                  )}
+                  {showPasswordInput && verificationStep && (
+                    <div className="space-y-4 pt-4 animate-fade-in">
+                      <Label className="text-center block">Enter Current Passcode</Label>
+                      <NumericPad 
+                        value={currentPasswordInput}
+                        onChange={setCurrentPasswordInput}
+                      />
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => {
+                            setVerificationStep(false);
+                            setCurrentPasswordInput("");
+                          }}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleVerifyCurrentPassword} 
+                          className="flex-1"
+                        >
+                          Verify
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  {showEmailRecovery && (
+                    <div className="space-y-4 pt-4 animate-fade-in">
+                      <Label className="text-center block">Email Recovery</Label>
+                      <p className="text-sm text-muted-foreground text-center">
+                        Enter your email to receive your passcode
+                      </p>
+                      <Input
+                        type="email"
+                        value={recoveryEmail}
+                        onChange={(e) => setRecoveryEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        className="text-center"
+                      />
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => {
+                            setShowEmailRecovery(false);
+                            setRecoveryEmail("");
+                          }}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleEmailRecovery} 
+                          className="flex-1"
+                          disabled={!recoveryEmail}
+                        >
+                          Send Recovery Email
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>

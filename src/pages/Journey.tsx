@@ -159,101 +159,108 @@ const Journey = () => {
     <Layout>
       <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-8">
         <div className="w-full max-w-4xl space-y-6 animate-fade-in">
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 mb-6">
             <h1 className="text-4xl font-bold text-foreground">Your Journey</h1>
             <p className="text-muted-foreground">
               {currentIndex + 1} of {portals.length} moments
             </p>
           </div>
 
-          {/* Before Section */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Before</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Media attached to the portal before it was opened
+          {/* Portal Name */}
+          <div className="text-center mb-4">
+            <h2 className="text-2xl font-bold text-foreground">{currentPortal.title}</h2>
+            <p className="text-sm text-muted-foreground">
+              {new Date(currentPortal.unlockDate).toLocaleDateString(undefined, {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </p>
-            <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted/20 border border-border shadow-lg">
-              {currentPortal.images && currentPortal.images[0] && (
-                <img
-                  src={currentPortal.images[0]}
-                  alt={currentPortal.title}
-                  className="w-full h-full object-cover"
-                />
-              )}
-              
-              {/* Navigation arrows */}
-              {portals.length > 1 && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handlePrevious}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/95 backdrop-blur-sm"
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleNext}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/95 backdrop-blur-sm"
-                  >
-                    <ChevronRight className="w-6 h-6" />
-                  </Button>
-                </>
-              )}
-            </div>
+          </div>
 
-            {/* Portal info */}
-            <div className="text-center space-y-2 p-4 mt-4">
-              <h3 className="text-lg font-semibold text-foreground">{currentPortal.title}</h3>
-              <p className="text-sm text-muted-foreground">{currentPortal.description}</p>
-              <p className="text-xs text-muted-foreground">
-                {new Date(currentPortal.unlockDate).toLocaleDateString(undefined, {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
+          {/* Before & After Side by Side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Before Section */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-3">Before</h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Media attached before opening
               </p>
-            </div>
+              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted/20 border border-border shadow-lg">
+                {currentPortal.images && currentPortal.images[0] && (
+                  <img
+                    src={currentPortal.images[0]}
+                    alt={currentPortal.title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+            </Card>
+
+            {/* After Section */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-3">After</h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Comparison results
+              </p>
+              {afterImages[currentPortal.id] ? (
+                <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted/20 border-2 border-foreground shadow-lg">
+                  <img
+                    src={afterImages[currentPortal.id]}
+                    alt="After"
+                    className="w-full h-full object-cover"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => handleRemoveAfterImage(currentPortal.id)}
+                    className="absolute top-4 right-4 bg-destructive/90 hover:bg-destructive"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Upload className="w-10 h-10 text-muted-foreground mb-2" />
+                  <span className="text-xs text-muted-foreground mb-1">Upload "after" image</span>
+                  <span className="text-xs text-muted-foreground">for comparison</span>
+                  <Input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/heic,image/webp"
+                    onChange={(e) => handleAfterImageUpload(currentPortal.id, e)}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </Card>
+          </div>
+
+          {/* Description */}
+          <Card className="p-6">
+            <p className="text-sm text-foreground">{currentPortal.description}</p>
           </Card>
 
-          {/* After Section */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">After</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Upload comparison results after the portal has been opened
-            </p>
-            {afterImages[currentPortal.id] ? (
-              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted/20 border-2 border-foreground shadow-lg">
-                <img
-                  src={afterImages[currentPortal.id]}
-                  alt="After"
-                  className="w-full h-full object-cover"
-                />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleRemoveAfterImage(currentPortal.id)}
-                  className="absolute top-4 right-4 bg-destructive/90 hover:bg-destructive"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                <Upload className="w-12 h-12 text-muted-foreground mb-3" />
-                <span className="text-sm text-muted-foreground mb-1">Upload "after" image</span>
-                <span className="text-xs text-muted-foreground">for comparison with "before"</span>
-                <Input
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/heic,image/webp"
-                  onChange={(e) => handleAfterImageUpload(currentPortal.id, e)}
-                  className="hidden"
-                />
-              </label>
-            )}
-          </Card>
+          {/* Navigation arrows */}
+          {portals.length > 1 && (
+            <div className="flex gap-2 justify-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handlePrevious}
+                className="bg-background/80 hover:bg-background/95 backdrop-blur-sm"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleNext}
+                className="bg-background/80 hover:bg-background/95 backdrop-blur-sm"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </Button>
+            </div>
+          )}
 
           {/* Thumbnail navigation */}
           {portals.length > 1 && (

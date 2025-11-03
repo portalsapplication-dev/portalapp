@@ -147,26 +147,28 @@ const PortalCard = ({ portal, onDelete }: PortalCardProps) => {
             {/* Content */}
             <div className="relative h-full flex flex-col items-center justify-center p-4 text-center">
             {/* Lock/Unlock icon */}
-            <div className={`mb-2 p-2 rounded-full transition-all duration-300 ${
+            <div className={`mb-3 p-3 rounded-full transition-all duration-300 ${
               isUnlocked 
-                ? "bg-foreground/15 group-hover:scale-110 animate-float" 
+                ? hasBeenOpened
+                  ? "bg-foreground/15"
+                  : "bg-foreground/15 group-hover:scale-110 animate-float"
                 : "bg-muted/50"
             }`}>
               {isUnlocked ? (
-                <Unlock className="w-5 h-5 text-foreground" />
+                <Unlock className="w-8 h-8 text-foreground" />
               ) : (
-                <Lock className="w-5 h-5 text-muted-foreground" />
+                <Lock className="w-8 h-8 text-muted-foreground" />
               )}
             </div>
 
             {/* Title */}
-            <h3 className="text-base font-semibold text-foreground mb-1 line-clamp-2 group-hover:text-foreground/80 transition-colors">
+            <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-foreground/80 transition-colors">
               {portal.title}
             </h3>
 
             {/* Countdown */}
-            <div className="flex items-center gap-1 text-xs">
-              <Clock className="w-3 h-3 text-muted-foreground" />
+            <div className="flex items-center gap-1.5 text-sm">
+              <Clock className="w-4 h-4 text-muted-foreground" />
               <span className={`font-medium ${isUnlocked ? "text-foreground" : "text-muted-foreground"}`}>
                 {isUnlocked ? "Unlocked" : timeLeft}
               </span>

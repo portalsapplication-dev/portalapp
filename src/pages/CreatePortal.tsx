@@ -15,6 +15,8 @@ import logoBlack from "@/assets/logo-black.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
 import { Camera, Video } from "lucide-react";
+import NumericPad from "@/components/NumericPad";
+import { Switch } from "@/components/ui/switch";
 
 const DURATION_PRESETS = [
   { label: "1 Day", days: 1 },
@@ -42,6 +44,8 @@ const CreatePortal = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [sealingProgress, setSealingProgress] = useState(0);
   const [unlockTime, setUnlockTime] = useState("00:00");
+  const [enablePortalPassword, setEnablePortalPassword] = useState(false);
+  const [portalPassword, setPortalPassword] = useState("");
 
   useEffect(() => {
     // Check if user is authenticated
@@ -141,6 +145,7 @@ const CreatePortal = () => {
         images,
         notes: finalNotes.trim(),
         isUnlocked: false,
+        ...(enablePortalPassword && portalPassword ? { portalPassword } : {}),
       };
 
       console.log("Portal data:", portal);
@@ -436,6 +441,32 @@ const CreatePortal = () => {
                         </button>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Password Protection Option */}
+              <div className="space-y-4 p-4 border border-border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="portal-password" className="text-sm font-medium">Portal Password</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Require a passcode to view this portal (optional)
+                    </p>
+                  </div>
+                  <Switch
+                    id="portal-password"
+                    checked={enablePortalPassword}
+                    onCheckedChange={setEnablePortalPassword}
+                  />
+                </div>
+                {enablePortalPassword && (
+                  <div className="space-y-4 pt-4 animate-fade-in">
+                    <Label className="text-center block text-sm">Set Portal Passcode</Label>
+                    <NumericPad 
+                      value={portalPassword}
+                      onChange={setPortalPassword}
+                    />
                   </div>
                 )}
               </div>
